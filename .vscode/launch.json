@@ -2,48 +2,27 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch GDB",
+      "name": "QEMU Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/Qemu/qemu-system-i386w.exe",
+      "program": "${workspaceFolder}/Qemu/qemu-system-i386w.exe", // QEMU 可执行文件路径
       "args": [
         "-S",
         "-gdb",
-        "tcp::1234,nowait,nodelay,server,ipv4",
-        "-m",
-        "32",
-        "-boot",
-        "order=c",
-        "-vga",
-        "std",
-        "-hda",
-        "${workspaceFolder}/epos/hd.img",
-        "-L",
-        "${workspaceFolder}/Qemu/Bios"
+        "tcp::1234",
+        "hd.img"
       ],
-      "stopAtEntry": true,
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",
-      "miDebuggerPath": "E:/mingw64/bin/gdb.exe",
-      "miDebuggerServerAddress": "localhost:1234",
       "setupCommands": [
         {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
+          "description": "Set breakpoint at main",
+          "text": "break main"
         }
-      ]
-    },
-    {
-      "type": "gdb",
-      "request": "attach",
-      "name": "Attach to QEMU",
-      "target": "localhost:1234",
-      "remote": true,
-      "cwd": "${workspaceFolder}",
-      "gdbpath": "E:/mingw64/bin/gdb.exe"
+      ],
     }
   ]
 }

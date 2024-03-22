@@ -11,6 +11,7 @@ int task_create(void *tos, void (*func)(void *pv), void *pv);
 int task_getid();
 void task_yield();
 int task_wait(int tid, int *pcode_exit);
+
 int reboot(int howto);
 void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
 int munmap(void *addr, size_t len);
