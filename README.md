@@ -2,6 +2,8 @@
 
 20220815 2024/3/17
 
+切换到分支 main
+
 ---
 
 ## 任务记录
@@ -304,6 +306,10 @@ ____
 
 # 操作系统第二次实验报告
 
+20220815 2024/3/22
+
+切换到分支experiment2
+
 ## 分析代码
 
 ~~~cpp
@@ -334,3 +340,72 @@ pcode_exit ：如果非NULL，用于保存线程tid的退出代码
 ~~~
 
 ![image-20240322090757004](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240322090757004.png)
+
+## 第一次线程创建测试
+
+epos/userapp/main.c
+
+~~~cpp
+/*
+ * vim: filetype=c:fenc=utf-8:ts=4:et:sw=4:sts=4
+ */
+#include <inttypes.h>
+#include <stddef.h>
+#include <math.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <syscall.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include "graphics.h"
+
+extern void *tlsf_create_with_pool(void *mem, size_t bytes);
+extern void *g_heap;
+
+void tsk_foo(void *pv)
+{
+    printf("This is task foo with tid=%d\r\n", task_getid());
+    task_exit(0); // 不能直接 return，必须调用 task_exit
+}
+
+/**
+ * GCC insists on __main
+ *    http://gcc.gnu.org/onlinedocs/gccint/Collect2.html
+ */
+void __main()
+{
+    size_t heap_size = 32 * 1024 * 1024;
+    void *heap_base = mmap(NULL, heap_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    g_heap = tlsf_create_with_pool(heap_base, heap_size);
+}
+
+/**
+ * 第一个运行在用户模式的线程所执行的函数
+ */
+void main(void *pv)
+{
+    printf("task #%d: I'm the first user task(pv=0x%08x)!\r\n",
+           task_getid(), pv);
+    // 创建新的线程
+    unsigned char *stack_foo;
+    unsigned int stack_size = 1024 * 1024;
+    stack_foo = (unsigned char *)malloc(stack_size);
+    int tid_foo;
+    tid_foo = task_create(stack_foo + stack_size, &tsk_foo, (void *)0);
+    while (1)
+        ;
+    task_exit(0);
+}
+~~~
+
+![image-20240322093740505](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240322093740505.png)
+
+
+
+注意架构更改后 要在Makefile处增添链接文件
+
+> COBJS=  vm86call.o graphics.o main.o list_utils.o
+
+
+
+ctrl+shift+b快速编译启动

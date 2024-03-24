@@ -13,7 +13,7 @@ CFLAGS=	-m32 -Wall -DSNPRINTF_FLOATPOINT \
 LDFLAGS=-m32 -nostdlib -nostartfiles -nodefaultlibs \
 		-Wl,-Map,$(PROG).map
 
-COBJS=	vm86call.o graphics.o main.o
+COBJS=	vm86call.o graphics.o main.o list_utils.o
 COBJS+=	lib/sysconf.o lib/math.o lib/stdio.o lib/stdlib.o \
 		lib/qsort.o
 COBJS+=	../lib/softfloat.o ../lib/string.o ../lib/memcpy.o \
@@ -31,11 +31,11 @@ make.dep: *.c *.h
 .DELETE_ON_ERROR: make.dep
 
 .PHONY: debug
-debug: CFLAGS+=-O0 -ggdb
+debug: CFLAGS+=-std=c99 -O0 -ggdb
 debug: $(PROG).out
 
 .PHONY: run
-run: CFLAGS+=-O2 -ggdb
+run: CFLAGS+=-std=c99 -O2 -ggdb
 run: $(PROG).out
 
 .PHONY: clean

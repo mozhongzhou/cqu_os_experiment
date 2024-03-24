@@ -1,1 +1,4 @@
-E:\CODE\expenv\Qemu\qemu-system-i386w.exe: -gdb tcp::1234: Could not open 'hd.img': Invalid argument
+WARNING: Image format was not specified for 'hd.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+Misaligned i/o to address 0000ffff with size 4 for memory region io
