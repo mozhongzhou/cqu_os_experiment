@@ -10,7 +10,6 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include "graphics.h"
-
 #include "list_utils.h"
 
 extern void *tlsf_create_with_pool(void *mem, size_t bytes);
@@ -63,30 +62,25 @@ void sort_thread_2(void *arg)
 
     int *list = (int *)arg;
     int size = LIST_SIZE; //  LIST_SIZE 是列表的大小
-
+    int i, j, min_idx, temp;
     // 选择排序算法
-    for (int i = 0; i < size - 1; i++)
+    // 遍历所有数组元素
+    for (i = 0; i < size - 1; i++)
     {
-        int min_index = i;
-        for (int j = i + 1; j < size; j++)
-        {
-            if (list[j] < list[min_index])
-            {
-                min_index = j;
-            }
-        }
-        // 将找到的最小元素交换到已排序部分的末尾
-        if (min_index != i)
-        {
-            // 清除之前的绘图痕迹（黑色线段）
-            line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 0, 0));
-            line(region_width, (min_index)*GAP, region_width + list[min_index], (min_index)*GAP, RGB(0, 0, 0));
-            int temp = list[i];
-            list[i] = list[min_index];
-            list[min_index] = temp;
-            line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 255, 0));
-            line(region_width, (min_index)*GAP, region_width + list[min_index], (min_index)*GAP, RGB(0, 255, 0));
-        }
+        // 找到剩余部分的最小元素
+        min_idx = i;
+        for (j = i + 1; j < size; j++)
+            if (list[j] < list[min_idx])
+                min_idx = j;
+
+        // 将找到的最小元素交换到已排序部分的末尾 从前往后增大
+        temp = list[min_idx]; // 把第i和第min_idx个元素交换
+        line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 0, 0));
+        line(region_width, min_idx * GAP, region_width + list[min_idx], min_idx * GAP, RGB(0, 0, 0));
+        list[min_idx] = list[i];
+        list[i] = temp;
+        line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 255, 0));
+        line(region_width, min_idx * GAP, region_width + list[min_idx], min_idx * GAP, RGB(0, 255, 0));
     }
     printf("Thread 2 finished.\n");
     task_exit(0);
@@ -107,19 +101,19 @@ void sort_thread_3(void *arg)
     {
         int key = list[i];
         int j = i - 1;
-        // 清除之前的绘图痕迹（黑色线段）
-        line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(0, 0, 0));
-        line(region_width, (j + 1) * GAP, region_width + list[j + 1], (j + 1) * GAP, RGB(0, 0, 0));
+
         // 将大于 key 的元素向后移动一位
         while (j >= 0 && list[j] > key)
         {
+            line(region_width, (j + 1) * GAP, region_width + list[j + 1], (j + 1) * GAP, RGB(0, 0, 0));
+            line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(0, 0, 0));
+
             list[j + 1] = list[j];
-            j = j - 1;
-            // 绘制交换后的数据
-            line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(0, 0, 255));
             line(region_width, (j + 1) * GAP, region_width + list[j + 1], (j + 1) * GAP, RGB(0, 0, 255));
+            j--;
         }
         list[j + 1] = key;
+        line(region_width, (j + 1) * GAP, region_width + list[j + 1], (j + 1) * GAP, RGB(0, 0, 255));
     }
     printf("Thread 3 finished.\n");
 
