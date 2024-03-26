@@ -2,6 +2,13 @@
     "files.associations": {
         "complex": "c",
         "list_utils.h": "c",
-        "windows.h": "c"
+        "windows.h": "c",
+        "time.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "graphics.h": "c",
+        "mman.h": "c",
+        "inttypes.h": "c"
     }
 }

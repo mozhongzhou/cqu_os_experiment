@@ -31,11 +31,11 @@ make.dep: *.c *.h
 .DELETE_ON_ERROR: make.dep
 
 .PHONY: debug
-debug: CFLAGS+=-std=c99 -O0 -ggdb
+debug: CFLAGS+=-std=c99 -O0 -ggdb 
 debug: $(PROG).out
 
 .PHONY: run
-run: CFLAGS+=-std=c99 -O2 -ggdb
+run: CFLAGS+=-std=c99 -O2 -ggdb 
 run: $(PROG).out
 
 .PHONY: clean

@@ -16,16 +16,17 @@ extern void *tlsf_create_with_pool(void *mem, size_t bytes);
 extern void *g_heap;
 
 #define N 7           // 需要生成的列表数量和线程数量
-#define LIST_SIZE 300 // 每个列表的大小
-#define GAP 2         // 每个条形的间隔
+#define LIST_SIZE 200 // 每个列表的大小
+#define GAP 3         // 每个条形的间隔
 
 void sort_thread_1(void *arg)
 {
 
-    printf("Thread 1 started.\n");
     int *list = (int *)arg;
     int size = LIST_SIZE; //  LIST_SIZE 是列表的大小
-
+    // 计算每个区域的宽度
+    int x_res = g_graphic_dev.XResolution;
+    int region_width = x_res / N;
     // 冒泡排序算法
     for (int i = 0; i < size - 1; i++)
     {
@@ -34,13 +35,12 @@ void sort_thread_1(void *arg)
             if (list[j] > list[j + 1])
             {
                 // 清除之前的绘图痕迹（黑色线段）
-                line(0, j * GAP, list[j], j * GAP, RGB(0, 0, 0));
-                line(0, (j + 1) * GAP, list[j + 1], (j + 1) * GAP, RGB(0, 0, 0));
+                line(0, j * GAP, region_width, j * GAP, RGB(0, 0, 0));
+                line(0, (j + 1) * GAP, region_width, (j + 1) * GAP, RGB(0, 0, 0));
                 // 交换 list[j] 和 list[j + 1]
                 int temp = list[j];
                 list[j] = list[j + 1];
                 list[j + 1] = temp;
-
                 // 绘制交换后的数据（红色线段）
                 line(0, j * GAP, list[j], j * GAP, RGB(255, 0, 0));
                 line(0, (j + 1) * GAP, list[j + 1], (j + 1) * GAP, RGB(255, 0, 0));
@@ -48,7 +48,6 @@ void sort_thread_1(void *arg)
         }
     }
 
-    printf("Thread 1 finished.\n");
     task_exit(0);
 }
 
@@ -62,7 +61,9 @@ void sort_thread_2(void *arg)
 
     int *list = (int *)arg;
     int size = LIST_SIZE; //  LIST_SIZE 是列表的大小
+
     int i, j, min_idx, temp;
+
     // 选择排序算法
     // 遍历所有数组元素
     for (i = 0; i < size - 1; i++)
@@ -79,10 +80,10 @@ void sort_thread_2(void *arg)
         line(region_width, min_idx * GAP, region_width + list[min_idx], min_idx * GAP, RGB(0, 0, 0));
         list[min_idx] = list[i];
         list[i] = temp;
-        line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 255, 0));
+        line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 250, 0));
         line(region_width, min_idx * GAP, region_width + list[min_idx], min_idx * GAP, RGB(0, 255, 0));
     }
-    printf("Thread 2 finished.\n");
+
     task_exit(0);
 }
 void sort_thread_3(void *arg)
@@ -179,153 +180,167 @@ void quickSort(int *list, int low, int high)
 void sort_thread_4(void *arg)
 {
 
-    printf("Thread 4 started.\n");
-
     int *list = (int *)arg;
     int size = LIST_SIZE; // 假设 LIST_SIZE 是列表的大小
+                          // 绘制原始数据线段
+                          // 获取屏幕分辨率
 
     // 快速排序算法
     quickSort(list, 0, size - 1);
-    printf("Thread 4 finished.\n");
 
     task_exit(0);
 }
 //////////////////////////////////////////////////////////////////////////////
-
-// 归并排序的辅助函数
-void merge(int *list, int left, int mid, int right)
-{
-    // 获取屏幕分辨率
+void merge(int *arr, int l, int m, int r)
+{ // 获取屏幕分辨率
     int x_res = g_graphic_dev.XResolution;
     // 计算每个区域的宽度
     int region_width = x_res / N * 4;
-
     int i, j, k;
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+    int n1 = m - l + 1;
+    int n2 = r - m;
 
     int L[n1], R[n2];
 
     for (i = 0; i < n1; i++)
-        L[i] = list[left + i];
+        L[i] = arr[l + i];
     for (j = 0; j < n2; j++)
-        R[j] = list[mid + 1 + j];
+        R[j] = arr[m + 1 + j];
 
     i = 0;
     j = 0;
-    k = left;
+    k = l;
     while (i < n1 && j < n2)
     {
         if (L[i] <= R[j])
         {
-            list[k] = L[i];
+            arr[k] = L[i];
             i++;
         }
         else
         {
-            list[k] = R[j];
+            arr[k] = R[j];
             j++;
         }
+
+        // 画线：清除之前的绘图痕迹（黑色线段）
+        line(region_width, k * GAP, region_width + arr[k], k * GAP, RGB(0, 0, 0));
+
+        // 绘制当前值（红色线段）
+        line(region_width, k * GAP, region_width + arr[k], k * GAP, RGB(0, 255, 0));
+
         k++;
     }
 
     while (i < n1)
     {
-        list[k] = L[i];
+        arr[k] = L[i];
         i++;
         k++;
     }
 
     while (j < n2)
     {
-        list[k] = R[j];
+        arr[k] = R[j];
         j++;
         k++;
     }
 }
-
-// 实际的归并排序函数
-void mergeSort(int *list, int left, int right)
+void mergeSort(int *arr, int l, int r)
 {
-    if (left < right)
+    if (l < r)
     {
-        int mid = left + (right - left) / 2;
+        int m = l + (r - l) / 2;
 
-        mergeSort(list, left, mid);
-        mergeSort(list, mid + 1, right);
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
 
-        merge(list, left, mid, right);
+        merge(arr, l, m, r);
     }
 }
-
 void sort_thread_5(void *arg)
 {
-    printf("Thread 5 started.\n");
 
     int *list = (int *)arg;
     int size = LIST_SIZE; // 假设 LIST_SIZE 是列表的大小
-
-    // 归并排序算法
     mergeSort(list, 0, size - 1);
-    printf("Thread 5 finished.\n");
-
     task_exit(0);
 }
 ////////////////////////////////////////////////////////////////////
-// 堆排序的辅助函数
-void heapify(int *list, int n, int i)
+// 假设最大位数为10
+#define MAX_DIGITS 10
+
+// 基数排序函数
+void radixSort(int *arr, int n)
 {
+    int i, j;
+    int count[10] = {0};
+    int output[n];
+    int max_num = arr[0];
+    // 获取最大值
+    for (i = 1; i < n; i++)
+    {
+        if (arr[i] > max_num)
+        {
+            max_num = arr[i];
+        }
+    }
+    int max_digits = 0;
+    // 获取最大值的位数
+    while (max_num != 0)
+    {
+        max_num /= 10;
+        max_digits++;
+    }
     // 获取屏幕分辨率
     int x_res = g_graphic_dev.XResolution;
     // 计算每个区域的宽度
     int region_width = x_res / N * 5;
-    int largest = i;
-    int left = 2 * i + 1;
-    int right = 2 * i + 2;
-
-    if (left < n && list[left] > list[largest])
-        largest = left;
-
-    if (right < n && list[right] > list[largest])
-        largest = right;
-
-    if (largest != i)
+    // 逐位进行排序
+    for (i = 0; i < max_digits; i++)
     {
-        int swap = list[i];
-        list[i] = list[largest];
-        list[largest] = swap;
-
-        heapify(list, n, largest);
-    }
-}
-
-// 实际的堆排序函数
-void heapSort(int *list, int n)
-{
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(list, n, i);
-
-    for (int i = n - 1; i >= 0; i--)
-    {
-        int temp = list[0];
-        list[0] = list[i];
-        list[i] = temp;
-
-        heapify(list, i, 0);
+        // 清空计数数组
+        for (j = 0; j < 10; j++)
+        {
+            count[j] = 0;
+        }
+        // 统计每个数字出现的次数
+        for (j = 0; j < n; j++)
+        {
+            count[(arr[j] / (int)pow(10, i)) % 10]++;
+        }
+        // 将 count 转换为累计次数数组
+        for (j = 1; j < 10; j++)
+        {
+            count[j] += count[j - 1];
+        }
+        // 根据计数数组将数据放入临时数组
+        for (j = n - 1; j >= 0; j--)
+        {
+            output[count[(arr[j] / (int)pow(10, i)) % 10] - 1] = arr[j];
+            count[(arr[j] / (int)pow(10, i)) % 10]--;
+        }
+        // 将临时数组数据拷贝回原数组
+        for (j = 0; j < n; j++)
+        {
+            arr[j] = output[j];
+            // 清除之前的绘图痕迹（黑色线段）
+            line(region_width, j * GAP, region_width + arr[j], j * GAP, RGB(0, 0, 0));
+        }
+        // 绘制当前位的排序结果
+        for (j = 0; j < n; j++)
+        {
+            // 绘制交换后的数据（红色线段）
+            line(region_width, j * GAP, region_width + arr[j], j * GAP, RGB(0, 0, 255));
+        }
     }
 }
 
 void sort_thread_6(void *arg)
 {
-    printf("Thread 6 started.\n");
-
     int *list = (int *)arg;
     int size = LIST_SIZE; // 假设 LIST_SIZE 是列表的大小
-
-    // 堆排序算法
-    heapSort(list, size);
-    printf("Thread 6 finished.\n");
-
+    radixSort(list, size);
     task_exit(0);
 }
 
@@ -344,22 +359,26 @@ void shellSort(int *list, int n)
             int j;
             for (j = i; j >= gap && list[j - gap] > temp; j -= gap)
             {
+                line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(0, 0, 0));
+                line(region_width, (j - gap) * GAP, region_width + list[j - gap], (j - gap) * GAP, RGB(0, 0, 0));
                 list[j] = list[j - gap];
+                // 描出新的线
+                line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(255, 0, 0));
             }
             list[j] = temp;
+            line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(255, 0, 0));
         }
     }
 }
 
 void sort_thread_7(void *arg)
 {
-    printf("Thread 7 started.\n");
+
     int *list = (int *)arg;
     int size = LIST_SIZE; // 假设 LIST_SIZE 是列表的大小
 
     // 希尔排序算法
     shellSort(list, size);
-    printf("Thread 7 finished.\n");
 
     task_exit(0);
 }
@@ -424,12 +443,7 @@ void main(void *pv)
     // 生成一个随机列表
     int *random_list = generate_random_list(LIST_SIZE, region_width);
 
-    // 创建并启动排序线程
-    for (int i = 0; i < N; i++)
-    {
-        // 创建排序线程，传递相同的随机列表
-        create_sort_threads(i, random_list);
-    }
+    create_sort_threads(N, random_list);
 
     // 退出图形模式
     // exit_graphic();
