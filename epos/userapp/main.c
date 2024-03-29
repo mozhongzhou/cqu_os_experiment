@@ -63,7 +63,7 @@ void sort_thread_2(void *arg)
 {
     struct timespec ts;
     ts.tv_sec = 0;           // 秒
-    ts.tv_nsec = 500000000L; // 纳秒
+    ts.tv_nsec = 200000000L; // 纳秒
 
     // 获取屏幕分辨率
     int x_res = g_graphic_dev.XResolution;
@@ -98,81 +98,40 @@ void sort_thread_2(void *arg)
     task_exit(0);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
-int partition(int *list, int low, int high)
-{
-    struct timespec ts;
-    ts.tv_sec = 0;        // 秒
-    ts.tv_nsec = 600000L; // 纳秒
-    // 获取屏幕分辨率
-    int x_res = g_graphic_dev.XResolution;
-    // 计算每个区域的宽度
-    int region_width = x_res / N * 2;
-
-    int pivot = list[high];
-    int i = low - 1;
-
-    for (int j = low; j <= high - 1; j++)
-    {
-        if (list[j] < pivot)
-        {
-            // 清除之前的绘图痕迹（黑色线段）
-            line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 0, 0));
-
-            line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(0, 0, 0));
-
-            i++;
-            int temp = list[i];
-            list[i] = list[j];
-            list[j] = temp;
-
-            // 绘制交换后的数据（红色线段）
-            line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(173, 255, 47));
-
-            line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(173, 255, 47));
-
-            nanosleep(&ts, NULL);
-        }
-    }
-
-    // 清除最后一个交换的线段（黑色线段）
-    line(region_width, (i + 1) * GAP, region_width + list[(i + 1)], (i + 1) * GAP, RGB(0, 0, 0));
-
-    line(region_width, high * GAP, region_width + list[high], high * GAP, RGB(0, 0, 0));
-
-    int temp = list[i + 1];
-    list[i + 1] = list[high];
-    list[high] = temp;
-
-    // 绘制最终位置的数据（红色线段）
-    line(region_width, (i + 1) * GAP, region_width + list[(i + 1)], (i + 1) * GAP, RGB(173, 255, 47));
-
-    line(region_width, high * GAP, region_width + list[high], high * GAP, RGB(173, 255, 47));
-
-    return (i + 1);
-}
-
-// 实际的快速排序函数
-void quickSort(int *list, int low, int high)
-{
-    if (low < high)
-    {
-        int pi = partition(list, low, high);
-
-        quickSort(list, low, pi - 1);
-        quickSort(list, pi + 1, high);
-    }
-}
 
 void sort_thread_3(void *arg)
 {
 
+    struct timespec ts;
+    ts.tv_sec = 0;        // 秒
+    ts.tv_nsec = 900000L; // 纳秒
+    // 获取屏幕分辨率
+    int x_res = g_graphic_dev.XResolution;
+    // 计算每个区域的宽度
+    int region_width = x_res / N * 2;
     int *list = (int *)arg;
-    int size = LIST_SIZE; // 假设 LIST_SIZE 是列表的大小
-                          // 绘制原始数据线段
-                          // 获取屏幕分辨率
+    int size = LIST_SIZE;
+    // 冒泡排序
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (list[j] > list[j + 1])
+            {
+                // 画线：清除之前的绘图痕迹（黑色线段）
+                line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(0, 0, 0));
+                line(region_width, (j + 1) * GAP, region_width + list[j + 1], (j + 1) * GAP, RGB(0, 0, 0));
+                int temp = list[j];
+                list[j] = list[j + 1];
+                list[j + 1] = temp;
 
-    // 快速排序算法
-    quickSort(list, 0, size - 1);
+                // 绘制交换后的数据（红色线段）
+                line(region_width, j * GAP, region_width + list[j], j * GAP, RGB(173, 255, 47));
+                line(region_width, (j + 1) * GAP, region_width + list[j + 1], (j + 1) * GAP, RGB(173, 255, 47));
+                nanosleep(&ts, NULL);
+            }
+        }
+    }
 
     task_exit(0);
 }
