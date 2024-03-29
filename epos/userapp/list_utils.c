@@ -12,7 +12,7 @@ int *generate_random_list(int size, int region_width)
     // 填充随机数据
     for (int i = 0; i < size; i++)
     {
-        list[i] = rand() % 90;
+        list[i] = rand() % 150;
     }
     return list;
 }

@@ -5,11 +5,12 @@ PROG=	a
 .PHONY: all
 all: make.dep run
 
-CPPFLAGS=-nostdinc -I../include -Iinclude
+CPPFLAGS=-nostdlib -I../include -Iinclude 
 ASFLAGS=-m32 -Wall -D__ASSEMBLY__
 CFLAGS=	-m32 -Wall -DSNPRINTF_FLOATPOINT \
 	-ffreestanding -fno-stack-check -fleading-underscore \
-	-mno-ms-bitfields -mno-stack-arg-probe
+	-mno-ms-bitfields -mno-stack-arg-probe\
+
 LDFLAGS=-m32 -nostdlib -nostartfiles -nodefaultlibs \
 		-Wl,-Map,$(PROG).map
 

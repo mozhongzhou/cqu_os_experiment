@@ -9,6 +9,15 @@
         "initializer_list": "c",
         "graphics.h": "c",
         "mman.h": "c",
-        "inttypes.h": "c"
-    }
+        "inttypes.h": "c",
+        "unistd.h": "c",
+        "_mingw.h": "c",
+        "_mingw_mac.h": "c",
+        "_mingw_secapi.h": "c",
+        "stdlib.h": "c",
+        "in.h": "c",
+        "io.h": "c",
+        "syscall.h": "c"
+    },
+    "git.ignoreLimitWarning": true
 }
