@@ -49,12 +49,13 @@ void sort_thread_1(void *arg)
         line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(0, 0, 0));
 
         line(region_width, min_idx * GAP, region_width + list[min_idx], min_idx * GAP, RGB(0, 0, 0));
-        nanosleep(&ts, NULL);
+
         list[min_idx] = list[i];
         list[i] = temp;
 
         line(region_width, i * GAP, region_width + list[i], i * GAP, RGB(100, 149, 237));
         line(region_width, min_idx * GAP, region_width + list[min_idx], min_idx * GAP, RGB(100, 149, 237));
+        nanosleep(&ts, NULL);
     }
 
     task_exit(0);
@@ -103,8 +104,8 @@ void sort_thread_3(void *arg)
 {
 
     struct timespec ts;
-    ts.tv_sec = 0;        // 秒
-    ts.tv_nsec = 900000L; // 纳秒
+    ts.tv_sec = 0;         // 秒
+    ts.tv_nsec = 9000000L; // 纳秒
     // 获取屏幕分辨率
     int x_res = g_graphic_dev.XResolution;
     // 计算每个区域的宽度

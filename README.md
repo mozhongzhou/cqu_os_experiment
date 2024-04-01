@@ -310,7 +310,11 @@ ____
 
 切换到分支experiment2
 
-## 分析代码
+
+
+## 任务记录
+
+### 1、分析代码
 
 ~~~cpp
 //创建
@@ -341,7 +345,7 @@ pcode_exit ：如果非NULL，用于保存线程tid的退出代码
 
 ![image-20240322090757004](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240322090757004.png)
 
-## 第一次线程创建测试
+### 2、第一次线程创建测试
 
 epos/userapp/main.c
 
@@ -400,12 +404,36 @@ void main(void *pv)
 
 ![image-20240322093740505](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240322093740505.png)
 
-
+用ctrl+shift+b快速编译启动
 
 注意架构更改后 要在Makefile处增添链接文件
 
 > COBJS=  vm86call.o graphics.o main.o list_utils.o
 
+## 3、创建多线程
+
+~~~cpp
+~~~
 
 
-ctrl+shift+b快速编译启动
+
+
+
+
+
+
+
+## 经验记录
+
+
+
+![image-20240401104233942](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240401104233942.png)
+
+![image-20240401104205018](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240401104205018.png)
+
+## 代码理解
+
+## 创新部分
+
+
+
