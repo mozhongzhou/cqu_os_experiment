@@ -297,40 +297,6 @@ vscode+gdb+qemu 可视化调试
 等待 qemu 启动（自动 pause）后打开 vscode
 ctrl+shift+d 进入调试，启动 attach to QEMU 即可
 
+这里遇到了些挑战，最多将 gdb 附到 vscode 上，还不能实现可视化断点调试。
 
-这里遇到了些挑战，最多将gdb附到vscode上，还不能实现可视化断点调试。
-
-____
-
-# 操作系统第二次实验报告
-
-## 分析代码
-
-~~~cpp
-//创建
-int task_create(void *tos, void (*func)(void *pv), void *pv)
-tos ：用户栈的栈顶指针
-func ：线程函数
-pv ：传递给线程函数func的参数
-返回值 ：大于0，则表示新创建线程之ID
-
-//退出    
-int task_exit(int code_exit);
-code_exit ：线程的退出代码
-
-
-//获取线程自己的ID   
-int task_getid();
-
-
-//等待线程退出
-int task_wait(int tid, int *pcode_exit);
-tid ：要等待线程之ID
-pcode_exit ：如果非NULL，用于保存线程tid的退出代码
-    
-    
-//以上代码在userapp/include/syscall.h
-//观察epos/kernel/task.c，观测到内核类似的接口
-~~~
-
-![image-20240322090757004](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240322090757004.png)
+---
