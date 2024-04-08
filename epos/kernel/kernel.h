@@ -89,6 +89,9 @@ struct tcb
     int code_exit;              // 保存该线程的退出代码
     struct wait_queue *wq_exit; // 等待该线程退出的队列
 
+    int nice;     // 静态优先级
+    int estcpu;   // 线程最近使用了多少CPU时间
+    int priority; // 线程的动态优先级
     struct tcb *next;
     struct fpu fpu; // 数学协处理器的寄存器
 
@@ -162,6 +165,21 @@ int do_page_fault(struct context *ctx, uint32_t vaddr, uint32_t code);
 int sys_putchar(int c);
 int sys_getchar();
 
+/**
+ * 获取线程优先级
+ * @param tid 线程ID
+ * @return 线程的优先级（nice + NZERO），失败返回 -1
+ */
+int getpriority(int tid);
+
+/**
+ * 设置线程优先级
+ * @param tid  线程ID
+ * @param prio 优先级，范围 [0,2*NZERO-1]
+ * @return 成功返回 0，失败返回 -1
+ */
+int setpriority(int tid, int prio);
+
 struct tcb *sys_task_create(void *tos, void (*func)(void *pv), void *pv);
 void sys_task_exit(int code_exit);
 int sys_task_wait(int tid, int *pcode_exit);
@@ -175,6 +193,7 @@ uint32_t page_alloc(int npages, uint32_t prot, uint32_t user);
 uint32_t page_alloc_in_addr(uint32_t va, int npages, uint32_t prot);
 int page_free(uint32_t va, int npages);
 uint32_t page_prot(uint32_t va);
+
 #define VM_PROT_NONE 0x00
 #define VM_PROT_READ 0x01
 #define VM_PROT_WRITE 0x02

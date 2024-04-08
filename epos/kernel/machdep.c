@@ -783,6 +783,21 @@ void syscall(struct context *ctx)
             *loc = ctx->eax;
     }
     break;
+    case SYSCALL_getpriority:
+    {
+        int tid = *(int *)(ctx->esp + 4);
+        int priority = getpriority(tid);
+        ctx->eax = priority;
+    }
+    break;
+    case SYSCALL_setpriority:
+    {
+        int tid = *(int *)(ctx->esp + 4);
+        int prio = *(int *)(ctx->esp + 8);
+        int ret = setpriority(tid, prio);
+        ctx->eax = ret;
+    }
+    break;
     case SYSCALL_recv:
     case SYSCALL_send:
     case SYSCALL_ioctl:
