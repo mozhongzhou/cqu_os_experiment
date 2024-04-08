@@ -29,31 +29,40 @@ unsigned volatile g_timer_ticks = 0;
  */
 void isr_timer(uint32_t irq, struct context *ctx)
 {
-    g_timer_ticks++;
-    //sys_putchar('.');
+  g_timer_ticks++;
+  // sys_putchar('.');
 
-    if(g_task_running != NULL) {
-        //如果是task0在运行，则强制调度
-        if(g_task_running->tid == 0) {
-            g_resched = 1;
-        } else {
-            //否则，把当前线程的时间片减一
-            --g_task_running->timeslice;
-
-            //如果当前线程用完了时间片，也要强制调度
-            if(g_task_running->timeslice <= 0) {
-                g_resched = 1;
-                g_task_running->timeslice = TASK_TIMESLICE_DEFAULT;
-            }
-        }
+  if (g_task_running != NULL)
+  {
+    // 如果是task0在运行，则强制调度
+    if (g_task_running->tid == 0)
+    {
+      g_resched = 1;
     }
+    else
+    {
+      // 否则，把当前线程的时间片减一
+      --g_task_running->timeslice;
+
+      // 更新当前线程的estcpu属性
+      g_task_running->estcpu++;
+
+      // 如果当前线程用完了时间片，也要强制调度
+      if (g_task_running->timeslice <= 0)
+      {
+        g_resched = 1;
+        g_task_running->timeslice = TASK_TIMESLICE_DEFAULT;
+      }
+    }
+  }
 }
 
-#define barrier() __asm__ __volatile__ ("" : : : "memory")
+#define barrier() __asm__ __volatile__("" : : : "memory")
 static void busy_wait(unsigned loops)
 {
-  do {
-    barrier ();
+  do
+  {
+    barrier();
   } while (loops-- > 0);
 }
 
@@ -68,51 +77,53 @@ static unsigned loops_per_tick;
 
 void calibrate_delay(void)
 {
-    unsigned long tmp, loopbit;
-    int lps_precision = LPS_PREC;
+  unsigned long tmp, loopbit;
+  int lps_precision = LPS_PREC;
 
-    loops_per_tick = (1<<12);
+  loops_per_tick = (1 << 12);
 
-    printk("Calibrating delay... ");
+  printk("Calibrating delay... ");
 
-    while (loops_per_tick <<= 1) {
-        /* wait for "start of" clock tick */
-        tmp = g_timer_ticks;
-        while (tmp == g_timer_ticks)
-            /* nothing */;
-        /* Go .. */
-        tmp = g_timer_ticks;
-        busy_wait(loops_per_tick);
+  while (loops_per_tick <<= 1)
+  {
+    /* wait for "start of" clock tick */
+    tmp = g_timer_ticks;
+    while (tmp == g_timer_ticks)
+      /* nothing */;
+    /* Go .. */
+    tmp = g_timer_ticks;
+    busy_wait(loops_per_tick);
 
-        tmp = g_timer_ticks - tmp;
-        if (tmp)
-            break;
-    }
+    tmp = g_timer_ticks - tmp;
+    if (tmp)
+      break;
+  }
 
-    /* Do a binary approximation to get loops_per_tick set to equal one clock
-     * (up to lps_precision bits)
-     */
-    loops_per_tick >>= 1;
-    loopbit = loops_per_tick;
-    while ( lps_precision-- && (loopbit >>= 1) ) {
-        loops_per_tick |= loopbit;
+  /* Do a binary approximation to get loops_per_tick set to equal one clock
+   * (up to lps_precision bits)
+   */
+  loops_per_tick >>= 1;
+  loopbit = loops_per_tick;
+  while (lps_precision-- && (loopbit >>= 1))
+  {
+    loops_per_tick |= loopbit;
 
-        /* wait for "start of" clock tick */
-        tmp = g_timer_ticks;
-        while (tmp == g_timer_ticks)
-            /* nothing */;
-        /* Go .. */
-        tmp = g_timer_ticks;
-        busy_wait(loops_per_tick);
+    /* wait for "start of" clock tick */
+    tmp = g_timer_ticks;
+    while (tmp == g_timer_ticks)
+      /* nothing */;
+    /* Go .. */
+    tmp = g_timer_ticks;
+    busy_wait(loops_per_tick);
 
-        if (g_timer_ticks != tmp)   /* longer than 1 tick */
-            loops_per_tick &= ~loopbit;
-    }
+    if (g_timer_ticks != tmp) /* longer than 1 tick */
+      loops_per_tick &= ~loopbit;
+  }
 
-    printk ("%u loops per second (%lu.%02lu BogoMIPS)\r\n",
-            loops_per_tick * HZ,
-            loops_per_tick/(500000/HZ),
-            loops_per_tick/(5000/HZ) % 100);
+  printk("%u loops per second (%lu.%02lu BogoMIPS)\r\n",
+         loops_per_tick * HZ,
+         loops_per_tick / (500000 / HZ),
+         loops_per_tick / (5000 / HZ) % 100);
 }
 
 static unsigned _sleep(unsigned ticks)
@@ -120,20 +131,20 @@ static unsigned _sleep(unsigned ticks)
   unsigned start = g_timer_ticks;
 
   while (g_timer_ticks - start < ticks)
-    sys_task_yield ();
+    sys_task_yield();
 
   return 0;
 }
 
 /* Busy-wait for approximately NUM/DENOM seconds. */
-static void _delay (unsigned num, unsigned denom)
+static void _delay(unsigned num, unsigned denom)
 {
   /* Scale the numerator and denominator down by 1000 to avoid
      the possibility of overflow. */
-  busy_wait (loops_per_tick * num / 1000 * HZ / (denom / 1000));
+  busy_wait(loops_per_tick * num / 1000 * HZ / (denom / 1000));
 }
 
-static void do_sleep (unsigned num, unsigned denom)
+static void do_sleep(unsigned num, unsigned denom)
 {
   /* Convert NUM/DENOM seconds into timer ticks, rounding down.
 
@@ -144,31 +155,31 @@ static void do_sleep (unsigned num, unsigned denom)
   unsigned ticks = num * HZ / denom;
 
   if (ticks > 0)
-    {
-      /* We're waiting for at least one full timer tick.  Use
-         sys_sleep() because it will yield the CPU to other
-         processes. */
-      _sleep (ticks);
-    }
+  {
+    /* We're waiting for at least one full timer tick.  Use
+       sys_sleep() because it will yield the CPU to other
+       processes. */
+    _sleep(ticks);
+  }
   else
-    {
-      /* Otherwise, use a busy-wait loop for more accurate
-         sub-tick timing. */
-      _delay (num, denom);
-    }
+  {
+    /* Otherwise, use a busy-wait loop for more accurate
+       sub-tick timing. */
+    _delay(num, denom);
+  }
 }
 
 unsigned sys_sleep(unsigned seconds)
 {
-    do_sleep(seconds, 1);
-    return 0;
+  do_sleep(seconds, 1);
+  return 0;
 }
 
 int sys_nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
 {
-    if(rqtp->tv_sec > 0)
-        do_sleep(rqtp->tv_sec, 1);
-    if(rqtp->tv_nsec > 0)
-        do_sleep(rqtp->tv_nsec, 1000 * 1000 * 1000);
-    return 0;
+  if (rqtp->tv_sec > 0)
+    do_sleep(rqtp->tv_sec, 1);
+  if (rqtp->tv_nsec > 0)
+    do_sleep(rqtp->tv_nsec, 1000 * 1000 * 1000);
+  return 0;
 }
