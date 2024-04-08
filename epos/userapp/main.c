@@ -35,10 +35,13 @@ void __main()
  */
 void main(void *pv)
 {
-    printf("task #%d: I'm the first user task(pv=0x%08x)!\r\n",
-           task_getid(), pv);
+    srand(time(NULL));
+    for (int i = 0, temp; i < 300; i++)
+    {
+        temp = rand() % 200;
+        ary[i] = temp;
+    }
 
-    // TODO: Your code goes here
     int mode = 0x143;
     init_graphic(mode);
     line(200, 0, 200, 600, RGB(255, 0, 0));
@@ -58,24 +61,20 @@ void main(void *pv)
 
 void tsk_foo(void *pv)
 {
-    printf("task tid = %d\r\n", task_getid());
-    int gap = 600 / 300;
-    srand(time(NULL));
-    int ary[300], temp = 0, i;
-    for (i = 0; i < 300; i++)
+
+    int gap = 2;
+    for (int i = 0; i < 300; i++)
     {
-        temp = rand() % 200;
-        ary[i] = temp;
         line(0, i * gap, ary[i], i * gap, RGB(255, 0, 0));
     }
-    sort_bubble(ary);
+    sort_bubble2(ary);
     task_exit(0);
 }
 
 void sort_bubble(int ary[])
 {
     int i, j, temp = 0;
-    int gap = 600 / 300;
+    int gap = 2;
 
     for (i = 1; i < 300; i++)
     {
@@ -90,6 +89,28 @@ void sort_bubble(int ary[])
                 line(0, (j - 1) * gap, ary[j - 1], (j - 1) * gap, RGB(255, 0, 0));
 
                 line(0, j * gap, ary[j], j * gap, RGB(255, 0, 0));
+            }
+        }
+    }
+}
+void sort_bubble2(int ary[])
+{
+    int i, j, temp = 0;
+    int gap = 2;
+
+    for (i = 1; i < 300; i++)
+    {
+        for (j = i; j > 0; j--)
+        {
+            if (ary[j] < ary[j - 1])
+            {
+                line(200, (j - 1) * gap, 200 + ary[j - 1], (j - 1) * gap, RGB(0, 0, 0));
+                temp = ary[j];
+                ary[j] = ary[j - 1];
+                ary[j - 1] = temp;
+                line(200, (j - 1) * gap, 200 + ary[j - 1], (j - 1) * gap, RGB(255, 0, 0));
+
+                line(200, j * gap, 200 + ary[j], j * gap, RGB(255, 0, 0));
             }
         }
     }
