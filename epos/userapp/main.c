@@ -14,11 +14,12 @@
 extern void *tlsf_create_with_pool(void *mem, size_t bytes);
 extern void *g_heap;
 
-void tsk_foo(void *pv);
+void tsk_1(void *pv);
+void tsk_2(void *pv);
+void sort_bubble1(int ary[]);
+void sort_bubble2(int ary[]);
 
-void sort_bubble(int ary[]);
-
-int ary[300];
+int ary1[300], ary2[300];
 /**
  * GCC insists on __main
  *    http://gcc.gnu.org/onlinedocs/gccint/Collect2.html
@@ -38,40 +39,56 @@ void main(void *pv)
     srand(time(NULL));
     for (int i = 0, temp; i < 300; i++)
     {
-        temp = rand() % 200;
-        ary[i] = temp;
+        temp = rand() % 400;
+        ary1[i] = temp;
+        ary2[i] = temp;
     }
 
     int mode = 0x143;
     init_graphic(mode);
-    line(200, 0, 200, 600, RGB(255, 0, 0));
+    line(400, 0, 400, 600, RGB(255, 0, 0));
 
-    unsigned char *stack_foo;
+    unsigned char *stack_1, *stack_2;
     unsigned int stack_size = 1024 * 1024;
-    stack_foo = (unsigned char *)malloc(stack_size);
+    stack_1 = (unsigned char *)malloc(stack_size);
+    stack_2 = (unsigned char *)malloc(stack_size);
+    int tid_1, tid_2;
 
-    int tid_foo;
-    tid_foo = task_create(stack_foo + stack_size, &tsk_foo, (void *)0);
-    task_wait(tid_foo, NULL);
-    free(stack_foo);
+    tid_1 = task_create(stack_1 + stack_size, &tsk_1, (void *)0);
+    tid_2 = task_create(stack_2 + stack_size, &tsk_2, (void *)0);
+    task_wait(tid_1, NULL);
+    task_wait(tid_2, NULL);
+    free(stack_1);
+    free(stack_2);
     while (1)
         ;
     task_exit(0);
 }
 
-void tsk_foo(void *pv)
+void tsk_1(void *pv)
 {
 
     int gap = 2;
     for (int i = 0; i < 300; i++)
     {
-        line(0, i * gap, ary[i], i * gap, RGB(255, 0, 0));
+        line(0, i * gap, ary1[i], i * gap, RGB(128, 0, 128));
     }
-    sort_bubble2(ary);
+    sort_bubble1(ary1);
+    task_exit(0);
+}
+void tsk_2(void *pv)
+{
+
+    int gap = 2;
+    for (int i = 0; i < 300; i++)
+    {
+        line(400, i * gap, 400 + ary2[i], i * gap, RGB(255, 165, 0));
+    }
+    sort_bubble2(ary2);
     task_exit(0);
 }
 
-void sort_bubble(int ary[])
+void sort_bubble1(int ary[])
 {
     int i, j, temp = 0;
     int gap = 2;
@@ -83,12 +100,13 @@ void sort_bubble(int ary[])
             if (ary[j] < ary[j - 1])
             {
                 line(0, (j - 1) * gap, ary[j - 1], (j - 1) * gap, RGB(0, 0, 0));
+                nanosleep(0, 500000000);
                 temp = ary[j];
                 ary[j] = ary[j - 1];
                 ary[j - 1] = temp;
-                line(0, (j - 1) * gap, ary[j - 1], (j - 1) * gap, RGB(255, 0, 0));
-
-                line(0, j * gap, ary[j], j * gap, RGB(255, 0, 0));
+                line(0, (j - 1) * gap, ary[j - 1], (j - 1) * gap, RGB(128, 0, 128));
+                line(0, j * gap, ary[j], j * gap, RGB(128, 0, 128));
+                nanosleep(0, 500000000);
             }
         }
     }
@@ -104,13 +122,14 @@ void sort_bubble2(int ary[])
         {
             if (ary[j] < ary[j - 1])
             {
-                line(200, (j - 1) * gap, 200 + ary[j - 1], (j - 1) * gap, RGB(0, 0, 0));
+                line(400, (j - 1) * gap, 400 + ary[j - 1], (j - 1) * gap, RGB(0, 0, 0));
+                nanosleep(0, 500000000);
                 temp = ary[j];
                 ary[j] = ary[j - 1];
                 ary[j - 1] = temp;
-                line(200, (j - 1) * gap, 200 + ary[j - 1], (j - 1) * gap, RGB(255, 0, 0));
-
-                line(200, j * gap, 200 + ary[j], j * gap, RGB(255, 0, 0));
+                line(400, (j - 1) * gap, 400 + ary[j - 1], (j - 1) * gap, RGB(255, 165, 0));
+                line(400, j * gap, 400 + ary[j], j * gap, RGB(255, 165, 0));
+                nanosleep(0, 500000000);
             }
         }
     }
