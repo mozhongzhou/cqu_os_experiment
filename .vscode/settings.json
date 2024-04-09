@@ -17,7 +17,9 @@
         "stdlib.h": "c",
         "in.h": "c",
         "io.h": "c",
-        "syscall.h": "c"
+        "syscall.h": "c",
+        "kernel.h": "c",
+        "string.h": "c"
     },
     "git.ignoreLimitWarning": true
 }

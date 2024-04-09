@@ -44,6 +44,49 @@ time_t g_startup_time;
 #define IRQ_SLAVE 0x04
 #define ICU_SLAVEID 2
 #define ICU_IMR_OFFSET 1 /* IO_ICU{1,2} + 1 */
+#define NZERO 20
+#define PRI_USER_MIN 0
+#define PRI_USER_MAX 127
+
+int sys_getpriority(int tid)
+{
+    // tid=0，表示获取/设置当前线程的nice值，而不是task0
+    if (tid == 0)
+        return g_task_running->nice + NZERO;
+
+    uint32_t flags;
+    struct tcb *tsk;
+    save_flags_cli(flags);
+    tsk = get_task(tid);
+    restore_flags(flags);
+    return tsk->nice + NZERO; // 获取当前线程的nice值
+}
+/*把线程tid的nice设为(prio-NZERO)prio必须在[0,2*NZERO-1]内成功返回0，失败返回-1*/
+int sys_setpriority(int tid, int prio)
+{
+    uint32_t flags;
+    struct tcb *tsk;
+    if (tid == 0) // 特判tid==0情况
+    {
+        save_flags_cli(flags);
+        g_task_running->nice = prio - NZERO; // 把线程tid的nice设为(prio-NZERO)
+        restore_flags(flags);
+        return 0;
+    }
+    /*prio必须在[0,2*NZERO-1]内*/
+    if (prio < 0)
+        prio = 0;
+    if (prio > 2 * NZERO)
+        prio = 2 * NZERO;
+    /*用save_flags_cli/restore_flags保护起来*/
+    save_flags_cli(flags);
+    tsk = get_task(tid);
+    restore_flags(flags);
+    if (tsk == NULL)
+        return -1; // 设置失败返回-1
+    tsk->nice = prio - NZERO;
+    return 0;
+}
 /**
  * 初始化i8259中断控制器
  */
@@ -783,21 +826,7 @@ void syscall(struct context *ctx)
             *loc = ctx->eax;
     }
     break;
-    case SYSCALL_getpriority:
-    {
-        int tid = *(int *)(ctx->esp + 4);
-        int priority = getpriority(tid);
-        ctx->eax = priority;
-    }
-    break;
-    case SYSCALL_setpriority:
-    {
-        int tid = *(int *)(ctx->esp + 4);
-        int prio = *(int *)(ctx->esp + 8);
-        int ret = setpriority(tid, prio);
-        ctx->eax = ret;
-    }
-    break;
+
     case SYSCALL_recv:
     case SYSCALL_send:
     case SYSCALL_ioctl:

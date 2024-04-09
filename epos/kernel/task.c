@@ -20,39 +20,62 @@
 #include <stddef.h>
 #include <string.h>
 #include "kernel.h"
-
+#define NZERO 20
+#define PRI_USER_MIN 0
+#define PRI_USER_MAX 127
 int g_resched;
 struct tcb *g_task_head;
 struct tcb *g_task_running;
 struct tcb *task0;
 struct tcb *g_task_own_fpu;
 
-#define NZERO 20
 /**
  * CPU调度器函数，这里只实现了轮转调度算法
  *
  * 注意：该函数的执行不能被中断
  */
+
+/*********动态优先级调度*************/
 void schedule()
 {
-    struct tcb *select = g_task_running;
-    do
-    {
-        select = select->next;
-        if (select == NULL)
-            select = g_task_head;
-        if (select == g_task_running)
-            break;
-        if ((select->tid != 0) &&
-            (select->state == TASK_STATE_READY))
-            break;
-    } while (1);
 
-    if (select == g_task_running)
+    struct tcb *select = g_task_head;
+    struct tcb *select_plus = g_task_running;
+    // do
+    // {
+    //     select = select->next;
+    //     if (select == NULL)
+    //         select = g_task_head;
+    //     if (select == g_task_running)
+    //         break;
+    //     if ((select->tid != 0) &&
+    //         (select->state == TASK_STATE_READY))
+    //         break;
+    // } while (1);
+    while (select != NULL)
+    { // 遍历链表，计算所有线程的priority的值
+        select->priority = PRI_USER_MAX -
+                           fixedpt_toint(fixedpt_div(select->estcpu, fixedpt_fromint(4))) -
+                           select->nice * 2;
+        select = select->next;
+    }
+
+    select = g_task_head;
+    while (select != NULL)
+    {
+        if ((select->tid != 0) && (select->state == TASK_STATE_READY))
+        {
+            if (select->priority > select_plus->priority || select_plus->tid == 0)
+                select_plus = select; // 选择等待队列中优先级最高的线程
+        }
+        select = select->next;
+    }
+
+    if (select_plus == g_task_running)
     {
         if (select->state == TASK_STATE_READY)
             return;
-        select = task0;
+        select_plus = task0;
     }
 
     // printk("0x%d -> 0x%d\r\n", (g_task_running == NULL) ? -1 : g_task_running->tid, select->tid);
@@ -61,7 +84,7 @@ void schedule()
         printk("warning: kernel stack of task #%d overflow!!!", select->tid);
 
     g_resched = 0;
-    switch_to(select);
+    switch_to(select_plus);
 }
 
 /**
@@ -206,6 +229,7 @@ struct tcb *sys_task_create(void *tos,
     // 新增初始化nice字段为0
     new->nice = 0;
     new->estcpu = 0;
+    new->priority = 0;
     /*XXX - should be elsewhere*/
     new->fpu.cwd = 0x37f;
     new->fpu.twd = 0xffff;
@@ -320,32 +344,4 @@ void init_task()
      * 创建线程task0，即系统空闲线程
      */
     task0 = sys_task_create(NULL, NULL /*task0执行的函数将由run_as_task0填充*/, NULL);
-}
-// 实现 getpriority 函数
-int getpriority(int tid)
-{
-    struct tcb *task = get_task(tid);
-    if (task == NULL)
-    {
-        return -1; // 失败返回 -1
-    }
-    return task->nice + NZERO; // 返回线程的优先级
-}
-
-// 实现 setpriority 函数
-int setpriority(int tid, int prio)
-{
-    // 检查参数是否在合法范围内
-    if (prio < 0 || prio >= 2 * NZERO)
-    {
-        return -1; // 失败返回 -1
-    }
-    struct tcb *task = get_task(tid);
-    if (task == NULL)
-    {
-        return -1; // 失败返回 -1
-    }
-    // 设置线程的 nice 字段
-    task->nice = prio - NZERO;
-    return 0; // 成功返回 0
 }

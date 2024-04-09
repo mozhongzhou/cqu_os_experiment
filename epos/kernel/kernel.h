@@ -24,7 +24,12 @@
 #include <inttypes.h>
 #include <time.h>
 #include "machdep.h"
+#include "fixedptc.h"
 
+// 线程相关的宏定义
+#define NZERO 20
+#define PRI_USER_MIN 0
+#define PRI_USER_MAX 127
 /*中断向量表*/
 extern void (*g_intr_vector[])(uint32_t irq, struct context *ctx);
 
@@ -89,9 +94,9 @@ struct tcb
     int code_exit;              // 保存该线程的退出代码
     struct wait_queue *wq_exit; // 等待该线程退出的队列
 
-    int nice;     // 静态优先级
-    int estcpu;   // 线程最近使用了多少CPU时间
-    int priority; // 线程的动态优先级
+    int nice;       // 静态优先级
+    fixedpt estcpu; // 线程最近使用了多少CPU时间
+    int priority;   // 线程的动态优先级
     struct tcb *next;
     struct fpu fpu; // 数学协处理器的寄存器
 

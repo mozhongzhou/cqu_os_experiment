@@ -23,7 +23,7 @@
 
 /*记录系统启动以来，定时器中断的次数*/
 unsigned volatile g_timer_ticks = 0;
-
+fixedpt g_load_avg = 0; // （表示系统的平均负荷，初值为0）
 /**
  * 定时器的中断处理程序
  */

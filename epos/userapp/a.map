@@ -42,7 +42,6 @@ LOAD lib/syscall-wrapper.o
 LOAD vm86call.o
 LOAD graphics.o
 LOAD main.o
-LOAD list_utils.o
 LOAD lib/sysconf.o
 LOAD lib/math.o
 LOAD lib/stdio.o
@@ -55,10 +54,10 @@ LOAD ../lib/memset.o
 LOAD ../lib/snprintf.o
 LOAD lib/malloc.o
 LOAD ../lib/tlsf/tlsf.o
-                0x00000380                . = SIZEOF_HEADERS
+                0x00000420                . = SIZEOF_HEADERS
                 0x00001000                . = ALIGN (__section_alignment__)
 
-.text           0x00401000     0x4400
+.text           0x00401000     0x4a00
  *(.init)
  *(.text)
  .text          0x00401000        0x8 lib/crt0.o
@@ -99,121 +98,120 @@ LOAD ../lib/tlsf/tlsf.o
                 0x00401ee4                tsk_1
                 0x00401f3c                sort_bubble2
                 0x00402050                tsk_2
- .text          0x004020ac       0x58 list_utils.o
-                0x004020ac                generate_random_list
- .text          0x00402104       0x18 lib/sysconf.o
-                0x00402104                sysconf
- .text          0x0040211c      0x1dc lib/math.o
-                0x0040211c                fabs
-                0x00402130                floor
-                0x00402178                ceil
-                0x004021d4                sin
-                0x004021dc                cos
-                0x004021e4                sqrt
-                0x004021ec                log2
-                0x004021fc                atan2
-                0x0040220c                tan
-                0x00402218                cot
-                0x00402224                pow
-                0x00402294                exp
-                0x004022d8                log
- .text          0x004022f8      0x18c lib/stdio.o
-                0x004022f8                printf
-                0x00402350                fprintf
-                0x004023a8                vprintf
-                0x00402400                vfprintf
-                0x00402414                vsprintf
-                0x00402440                sprintf
-                0x0040246c                fputc
- .text          0x00402484      0x658 lib/stdlib.o
-                0x00402484                exit
-                0x0040248c                ldiv
-                0x004024a8                div
-                0x004024c4                rand_r
-                0x00402564                rand
-                0x00402620                srand
-                0x0040262c                strtol
-                0x0040284c                strtoul
-                0x00402ab8                atol
- .text          0x00402adc      0x840 lib/qsort.o
-                0x00402adc                qsort
- .text          0x0040331c      0x204 ../lib/softfloat.o
-                0x0040331c                __udivmoddi4
-                0x004033d4                __divdi3
-                0x0040343c                __moddi3
-                0x004034b0                __udivdi3
-                0x004034e4                __umoddi3
- .text          0x00403520      0x2a0 ../lib/string.o
-                0x00403520                memcmp
-                0x00403548                memmove
-                0x00403598                memchr
-                0x004035c0                strcat
-                0x004035e4                strcmp
-                0x00403610                strncmp
-                0x0040365c                strchr
-                0x00403680                strrchr
-                0x004036a4                strstr
-                0x00403744                strcpy
-                0x00403764                strlen
-                0x0040377c                strncpy
- .text          0x004037c0      0x530 ../lib/memcpy.o
-                0x004037c0                memcpy
- .text          0x00403cf0       0x9c ../lib/memset.o
-                0x00403cf0                memset
- .text          0x00403d8c      0x940 ../lib/snprintf.o
-                0x00403fdc                vsnprintf
-                0x00404694                snprintf
- .text          0x004046cc       0x90 lib/malloc.o
-                0x004046cc                malloc
-                0x004046e8                calloc
-                0x004046f8                memalign
-                0x0040471c                realloc
-                0x00404740                free
- .text          0x0040475c      0x9b4 ../lib/tlsf/tlsf.o
-                0x00404ad8                tlsf_check
-                0x00404bdc                tlsf_walk_pool
-                0x00404c48                tlsf_block_size
-                0x00404c5c                tlsf_check_pool
-                0x00404c94                tlsf_size
-                0x00404c9c                tlsf_align_size
-                0x00404ca4                tlsf_block_size_min
-                0x00404cac                tlsf_block_size_max
-                0x00404cb4                tlsf_pool_overhead
-                0x00404cbc                tlsf_alloc_overhead
-                0x00404cc4                tlsf_add_pool
-                0x00404d14                tlsf_remove_pool
-                0x00404d5c                tlsf_create
-                0x00404da8                tlsf_create_with_pool
-                0x00404e24                tlsf_destroy
-                0x00404e28                tlsf_get_pool
-                0x00404e34                tlsf_malloc
-                0x00404e60                tlsf_memalign
-                0x00404f40                tlsf_free
-                0x00404fb4                tlsf_realloc
+ .text          0x004020ac       0x18 lib/sysconf.o
+                0x004020ac                sysconf
+ .text          0x004020c4      0x1dc lib/math.o
+                0x004020c4                fabs
+                0x004020d8                floor
+                0x00402120                ceil
+                0x0040217c                sin
+                0x00402184                cos
+                0x0040218c                sqrt
+                0x00402194                log2
+                0x004021a4                atan2
+                0x004021b4                tan
+                0x004021c0                cot
+                0x004021cc                pow
+                0x0040223c                exp
+                0x00402280                log
+ .text          0x004022a0      0x18c lib/stdio.o
+                0x004022a0                printf
+                0x004022f8                fprintf
+                0x00402350                vprintf
+                0x004023a8                vfprintf
+                0x004023bc                vsprintf
+                0x004023e8                sprintf
+                0x00402414                fputc
+ .text          0x0040242c      0x658 lib/stdlib.o
+                0x0040242c                exit
+                0x00402434                ldiv
+                0x00402450                div
+                0x0040246c                rand_r
+                0x0040250c                rand
+                0x004025c8                srand
+                0x004025d4                strtol
+                0x004027f4                strtoul
+                0x00402a60                atol
+ .text          0x00402a84      0x840 lib/qsort.o
+                0x00402a84                qsort
+ *fill*         0x004032c4        0xc 
+ .text          0x004032d0      0x550 ../lib/softfloat.o
+                0x004032d0                __udivmoddi4
+                0x004033e0                __divdi3
+                0x00403570                __moddi3
+                0x004036c0                __udivdi3
+                0x00403790                __umoddi3
+ .text          0x00403820      0x380 ../lib/string.o
+                0x00403820                memcmp
+                0x00403860                memmove
+                0x004038c0                memchr
+                0x004038f0                strcat
+                0x00403930                strcmp
+                0x00403970                strncmp
+                0x004039c0                strchr
+                0x004039f0                strrchr
+                0x00403a20                strstr
+                0x00403ac0                strcpy
+                0x00403b00                strlen
+                0x00403b30                strncpy
+ .text          0x00403ba0      0x560 ../lib/memcpy.o
+                0x00403ba0                memcpy
+ .text          0x00404100       0xf0 ../lib/memset.o
+                0x00404100                memset
+ .text          0x004041f0      0x8f0 ../lib/snprintf.o
+                0x00404a70                vsnprintf
+                0x00404aa0                snprintf
+ .text          0x00404ae0       0x90 lib/malloc.o
+                0x00404ae0                malloc
+                0x00404afc                calloc
+                0x00404b0c                memalign
+                0x00404b30                realloc
+                0x00404b54                free
+ .text          0x00404b70      0xc10 ../lib/tlsf/tlsf.o
+                0x00404fb0                tlsf_check
+                0x00405110                tlsf_walk_pool
+                0x00405180                tlsf_block_size
+                0x004051a0                tlsf_check_pool
+                0x004051d0                tlsf_size
+                0x004051e0                tlsf_align_size
+                0x004051f0                tlsf_block_size_min
+                0x00405200                tlsf_block_size_max
+                0x00405210                tlsf_pool_overhead
+                0x00405220                tlsf_alloc_overhead
+                0x00405230                tlsf_add_pool
+                0x004052a0                tlsf_remove_pool
+                0x00405320                tlsf_create
+                0x00405390                tlsf_create_with_pool
+                0x00405430                tlsf_destroy
+                0x00405440                tlsf_get_pool
+                0x00405450                tlsf_malloc
+                0x004054c0                tlsf_memalign
+                0x00405600                tlsf_free
+                0x00405620                tlsf_realloc
  *(SORT(.text$*))
  *(.text.*)
- .text.startup  0x00405110      0x11c main.o
-                0x00405110                main
+ .text.startup  0x00405780      0x11c main.o
+                0x00405780                main
  *(.gnu.linkonce.t.*)
  *(.glue_7t)
  *(.glue_7)
-                0x0040522c                ___CTOR_LIST__ = .
-                0x0040522c                __CTOR_LIST__ = .
-                0x0040522c        0x4 LONG 0xffffffff
+                0x0040589c                ___CTOR_LIST__ = .
+                0x0040589c                __CTOR_LIST__ = .
+                0x0040589c        0x4 LONG 0xffffffff
  *(.ctors)
  *(.ctor)
  *(SORT(.ctors.*))
-                0x00405230        0x4 LONG 0x0
-                0x00405234                ___DTOR_LIST__ = .
-                0x00405234                __DTOR_LIST__ = .
-                0x00405234        0x4 LONG 0xffffffff
+                0x004058a0        0x4 LONG 0x0
+                0x004058a4                ___DTOR_LIST__ = .
+                0x004058a4                __DTOR_LIST__ = .
+                0x004058a4        0x4 LONG 0xffffffff
  *(.dtors)
  *(.dtor)
  *(SORT(.dtors.*))
-                0x00405238        0x4 LONG 0x0
+                0x004058a8        0x4 LONG 0x0
  *(.fini)
  *(.gcc_exc)
-                0x0040523c                PROVIDE (etext, .)
+                0x004058ac                PROVIDE (etext, .)
  *(.gcc_except_table)
 
 .data           0x00406000      0x200
@@ -225,7 +223,6 @@ LOAD ../lib/tlsf/tlsf.o
  .data          0x00406000        0x0 vm86call.o
  .data          0x00406000        0x4 graphics.o
  .data          0x00406004        0x0 main.o
- .data          0x00406004        0x0 list_utils.o
  .data          0x00406004        0x0 lib/sysconf.o
  .data          0x00406004        0x0 lib/math.o
  .data          0x00406004        0x0 lib/stdio.o
@@ -244,7 +241,7 @@ LOAD ../lib/tlsf/tlsf.o
                 0x00406008                __data_end__ = .
  *(.data_cygwin_nocopy)
 
-.rdata          0x00407000      0x600
+.rdata          0x00407000      0x800
  *(.rdata)
  .rdata         0x00407000       0x2c vm86call.o
  .rdata         0x0040702c      0x260 graphics.o
@@ -253,67 +250,65 @@ LOAD ../lib/tlsf/tlsf.o
  .rdata         0x004072a0       0x20 ../lib/memcpy.o
  .rdata         0x004072c0      0x1dc ../lib/snprintf.o
  *(SORT(.rdata$*))
-                0x0040749c                __rt_psrelocs_start = .
+ .rdata$zzz     0x0040749c       0x44 ../lib/softfloat.o
+ .rdata$zzz     0x004074e0       0x44 ../lib/string.o
+ .rdata$zzz     0x00407524       0x44 ../lib/memcpy.o
+ .rdata$zzz     0x00407568       0x44 ../lib/memset.o
+ .rdata$zzz     0x004075ac       0x44 ../lib/snprintf.o
+ .rdata$zzz     0x004075f0       0x44 ../lib/tlsf/tlsf.o
+                0x00407634                __rt_psrelocs_start = .
  *(.rdata_runtime_pseudo_reloc)
-                0x0040749c                __rt_psrelocs_end = .
+                0x00407634                __rt_psrelocs_end = .
                 0x00000000                __rt_psrelocs_size = (__rt_psrelocs_end - __rt_psrelocs_start)
-                0x0040749c                ___RUNTIME_PSEUDO_RELOC_LIST_END__ = .
-                0x0040749c                __RUNTIME_PSEUDO_RELOC_LIST_END__ = .
-                0x0040749c                ___RUNTIME_PSEUDO_RELOC_LIST__ = (. - __rt_psrelocs_size)
-                0x0040749c                __RUNTIME_PSEUDO_RELOC_LIST__ = (. - __rt_psrelocs_size)
+                0x00407634                ___RUNTIME_PSEUDO_RELOC_LIST_END__ = .
+                0x00407634                __RUNTIME_PSEUDO_RELOC_LIST_END__ = .
+                0x00407634                ___RUNTIME_PSEUDO_RELOC_LIST__ = (. - __rt_psrelocs_size)
+                0x00407634                __RUNTIME_PSEUDO_RELOC_LIST__ = (. - __rt_psrelocs_size)
 
-.eh_frame       0x00408000     0x1400
+.eh_frame       0x00408000      0xa00
  *(.eh_frame*)
  .eh_frame      0x00408000       0x70 vm86call.o
  .eh_frame      0x00408070      0x1d4 graphics.o
  .eh_frame      0x00408244      0x114 main.o
- .eh_frame      0x00408358       0x54 list_utils.o
- .eh_frame      0x004083ac       0x2c lib/sysconf.o
- .eh_frame      0x004083d8      0x154 lib/math.o
- .eh_frame      0x0040852c      0x118 lib/stdio.o
- .eh_frame      0x00408644      0x190 lib/stdlib.o
- .eh_frame      0x004087d4       0x70 lib/qsort.o
- .eh_frame      0x00408844      0x108 ../lib/softfloat.o
- .eh_frame      0x0040894c      0x1f8 ../lib/string.o
- .eh_frame      0x00408b44       0x70 ../lib/memcpy.o
- .eh_frame      0x00408bb4       0x64 ../lib/memset.o
- .eh_frame      0x00408c18       0xb8 ../lib/snprintf.o
- .eh_frame      0x00408cd0       0x8c lib/malloc.o
- .eh_frame      0x00408d5c      0x4f4 ../lib/tlsf/tlsf.o
+ .eh_frame      0x00408358       0x2c lib/sysconf.o
+ .eh_frame      0x00408384      0x154 lib/math.o
+ .eh_frame      0x004084d8      0x118 lib/stdio.o
+ .eh_frame      0x004085f0      0x190 lib/stdlib.o
+ .eh_frame      0x00408780       0x70 lib/qsort.o
+ .eh_frame      0x004087f0       0x8c lib/malloc.o
 
 .pdata
  *(.pdata)
 
-.bss            0x0040a000      0xcb4
-                0x0040a000                __bss_start__ = .
+.bss            0x00409000      0xcb4
+                0x00409000                __bss_start__ = .
  *(.bss)
- .bss           0x0040a000        0x0 lib/crt0.o
- .bss           0x0040a000        0x0 lib/setjmp.o
- .bss           0x0040a000        0x0 lib/syscall-wrapper.o
- .bss           0x0040a000        0x0 vm86call.o
- .bss           0x0040a000      0x340 graphics.o
-                0x0040a000                g_graphic_dev
- .bss           0x0040a340        0x0 main.o
- .bss           0x0040a340        0x0 list_utils.o
- .bss           0x0040a340        0x0 lib/sysconf.o
- .bss           0x0040a340        0x0 lib/math.o
- .bss           0x0040a340        0x0 lib/stdio.o
- .bss           0x0040a340        0x0 lib/stdlib.o
- .bss           0x0040a340        0x0 lib/qsort.o
- .bss           0x0040a340        0x0 ../lib/softfloat.o
- .bss           0x0040a340        0x0 ../lib/string.o
- .bss           0x0040a340        0x0 ../lib/memcpy.o
- .bss           0x0040a340        0x0 ../lib/memset.o
- .bss           0x0040a340        0x0 ../lib/snprintf.o
- .bss           0x0040a340        0x0 lib/malloc.o
- .bss           0x0040a340        0x0 ../lib/tlsf/tlsf.o
+ .bss           0x00409000        0x0 lib/crt0.o
+ .bss           0x00409000        0x0 lib/setjmp.o
+ .bss           0x00409000        0x0 lib/syscall-wrapper.o
+ .bss           0x00409000        0x0 vm86call.o
+ .bss           0x00409000      0x340 graphics.o
+                0x00409000                g_graphic_dev
+ .bss           0x00409340        0x0 main.o
+ .bss           0x00409340        0x0 lib/sysconf.o
+ .bss           0x00409340        0x0 lib/math.o
+ .bss           0x00409340        0x0 lib/stdio.o
+ .bss           0x00409340        0x0 lib/stdlib.o
+ .bss           0x00409340        0x0 lib/qsort.o
+ .bss           0x00409340        0x0 ../lib/softfloat.o
+ .bss           0x00409340        0x0 ../lib/string.o
+ .bss           0x00409340        0x0 ../lib/memcpy.o
+ .bss           0x00409340        0x0 ../lib/memset.o
+ .bss           0x00409340        0x0 ../lib/snprintf.o
+ .bss           0x00409340        0x0 lib/malloc.o
+ .bss           0x00409340        0x0 ../lib/tlsf/tlsf.o
  *(COMMON)
- COMMON         0x0040a340      0x970 main.o
-                0x0040a340                ary1
-                0x0040a800                ary2
- COMMON         0x0040acb0        0x4 lib/malloc.o
-                0x0040acb0                g_heap
-                0x0040acb4                __bss_end__ = .
+ COMMON         0x00409340      0x970 main.o
+                0x00409340                ary1
+                0x00409800                ary2
+ COMMON         0x00409cb0        0x4 lib/malloc.o
+                0x00409cb0                g_heap
+                0x00409cb4                __bss_end__ = .
 
 .edata
  *(.edata)
@@ -326,48 +321,48 @@ LOAD ../lib/tlsf/tlsf.o
  *(.note.GNU-stack)
  *(.gnu.lto_*)
 
-.idata          0x0040b000      0x200
+.idata          0x0040a000      0x200
  SORT(*)(.idata$2)
  SORT(*)(.idata$3)
-                0x0040b000        0x4 LONG 0x0
-                0x0040b004        0x4 LONG 0x0
-                0x0040b008        0x4 LONG 0x0
-                0x0040b00c        0x4 LONG 0x0
-                0x0040b010        0x4 LONG 0x0
+                0x0040a000        0x4 LONG 0x0
+                0x0040a004        0x4 LONG 0x0
+                0x0040a008        0x4 LONG 0x0
+                0x0040a00c        0x4 LONG 0x0
+                0x0040a010        0x4 LONG 0x0
  SORT(*)(.idata$4)
-                0x0040b014                __IAT_start__ = .
+                0x0040a014                __IAT_start__ = .
  SORT(*)(.idata$5)
-                0x0040b014                __IAT_end__ = .
+                0x0040a014                __IAT_end__ = .
  SORT(*)(.idata$6)
  SORT(*)(.idata$7)
 
-.CRT            0x0040c000        0x0
-                0x0040c000                ___crt_xc_start__ = .
+.CRT            0x0040b000        0x0
+                0x0040b000                ___crt_xc_start__ = .
  *(SORT(.CRT$XC*))
-                0x0040c000                ___crt_xc_end__ = .
-                0x0040c000                ___crt_xi_start__ = .
+                0x0040b000                ___crt_xc_end__ = .
+                0x0040b000                ___crt_xi_start__ = .
  *(SORT(.CRT$XI*))
-                0x0040c000                ___crt_xi_end__ = .
-                0x0040c000                ___crt_xl_start__ = .
+                0x0040b000                ___crt_xi_end__ = .
+                0x0040b000                ___crt_xl_start__ = .
  *(SORT(.CRT$XL*))
-                0x0040c000                ___crt_xp_start__ = .
+                0x0040b000                ___crt_xp_start__ = .
  *(SORT(.CRT$XP*))
-                0x0040c000                ___crt_xp_end__ = .
-                0x0040c000                ___crt_xt_start__ = .
+                0x0040b000                ___crt_xp_end__ = .
+                0x0040b000                ___crt_xt_start__ = .
  *(SORT(.CRT$XT*))
-                0x0040c000                ___crt_xt_end__ = .
+                0x0040b000                ___crt_xt_end__ = .
 
-.tls            0x0040c000        0x0
-                0x0040c000                ___tls_start__ = .
+.tls            0x0040b000        0x0
+                0x0040b000                ___tls_start__ = .
  *(.tls)
  *(.tls$)
  *(SORT(.tls$*))
-                0x0040c000                ___tls_end__ = .
+                0x0040b000                ___tls_end__ = .
 
-.endjunk        0x0040c000        0x0
-                0x0040c000                PROVIDE (end, .)
-                0x0040c000                PROVIDE (_end, .)
-                0x0040c000                __end__ = .
+.endjunk        0x0040b000        0x0
+                0x0040b000                PROVIDE (end, .)
+                0x0040b000                PROVIDE (_end, .)
+                0x0040b000                __end__ = .
 
 .rsrc
  *(.rsrc)
@@ -382,40 +377,38 @@ LOAD ../lib/tlsf/tlsf.o
 .stabstr
  *(.stabstr)
 
-.debug_aranges  0x0040c000      0x400
+.debug_aranges  0x0040b000      0x200
  *(.debug_aranges)
  .debug_aranges
-                0x0040c000       0x20 vm86call.o
+                0x0040b000       0x20 vm86call.o
  .debug_aranges
-                0x0040c020       0x20 graphics.o
+                0x0040b020       0x20 graphics.o
  .debug_aranges
-                0x0040c040       0x28 main.o
+                0x0040b040       0x28 main.o
  .debug_aranges
-                0x0040c068       0x20 list_utils.o
+                0x0040b068       0x20 lib/sysconf.o
  .debug_aranges
-                0x0040c088       0x20 lib/sysconf.o
+                0x0040b088       0x20 lib/math.o
  .debug_aranges
-                0x0040c0a8       0x20 lib/math.o
+                0x0040b0a8       0x20 lib/stdio.o
  .debug_aranges
-                0x0040c0c8       0x20 lib/stdio.o
+                0x0040b0c8       0x20 lib/stdlib.o
  .debug_aranges
-                0x0040c0e8       0x20 lib/stdlib.o
+                0x0040b0e8       0x20 lib/qsort.o
  .debug_aranges
-                0x0040c108       0x20 lib/qsort.o
+                0x0040b108       0x20 ../lib/softfloat.o
  .debug_aranges
-                0x0040c128       0x20 ../lib/softfloat.o
+                0x0040b128       0x20 ../lib/string.o
  .debug_aranges
-                0x0040c148       0x20 ../lib/string.o
+                0x0040b148       0x20 ../lib/memcpy.o
  .debug_aranges
-                0x0040c168       0x20 ../lib/memcpy.o
+                0x0040b168       0x20 ../lib/memset.o
  .debug_aranges
-                0x0040c188       0x20 ../lib/memset.o
+                0x0040b188       0x20 ../lib/snprintf.o
  .debug_aranges
-                0x0040c1a8       0x20 ../lib/snprintf.o
+                0x0040b1a8       0x20 lib/malloc.o
  .debug_aranges
-                0x0040c1c8       0x20 lib/malloc.o
- .debug_aranges
-                0x0040c1e8       0x20 ../lib/tlsf/tlsf.o
+                0x0040b1c8       0x20 ../lib/tlsf/tlsf.o
 
 .debug_pubnames
  *(.debug_pubnames)
@@ -423,93 +416,92 @@ LOAD ../lib/tlsf/tlsf.o
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_info     0x0040d000     0x8a00
+.debug_info     0x0040c000     0x9e00
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x0040d000      0x373 vm86call.o
- .debug_info    0x0040d373     0x12e6 graphics.o
- .debug_info    0x0040e659      0x9d7 main.o
- .debug_info    0x0040f030      0x23b list_utils.o
- .debug_info    0x0040f26b       0xb0 lib/sysconf.o
- .debug_info    0x0040f31b      0x3ef lib/math.o
- .debug_info    0x0040f70a      0x572 lib/stdio.o
- .debug_info    0x0040fc7c      0x717 lib/stdlib.o
- .debug_info    0x00410393      0xe28 lib/qsort.o
- .debug_info    0x004111bb      0x37a ../lib/softfloat.o
- .debug_info    0x00411535      0x5c2 ../lib/string.o
- .debug_info    0x00411af7      0x2f5 ../lib/memcpy.o
- .debug_info    0x00411dec      0x1af ../lib/memset.o
- .debug_info    0x00411f9b      0x9d4 ../lib/snprintf.o
- .debug_info    0x0041296f      0x30b lib/malloc.o
- .debug_info    0x00412c7a     0x2c9c ../lib/tlsf/tlsf.o
+ .debug_info    0x0040c000      0x373 vm86call.o
+ .debug_info    0x0040c373     0x12e6 graphics.o
+ .debug_info    0x0040d659      0x9d7 main.o
+ .debug_info    0x0040e030       0xb0 lib/sysconf.o
+ .debug_info    0x0040e0e0      0x3ef lib/math.o
+ .debug_info    0x0040e4cf      0x572 lib/stdio.o
+ .debug_info    0x0040ea41      0x717 lib/stdlib.o
+ .debug_info    0x0040f158      0xe28 lib/qsort.o
+ .debug_info    0x0040ff80      0x618 ../lib/softfloat.o
+ .debug_info    0x00410598      0x6d9 ../lib/string.o
+ .debug_info    0x00410c71      0x39a ../lib/memcpy.o
+ .debug_info    0x0041100b      0x225 ../lib/memset.o
+ .debug_info    0x00411230      0xb50 ../lib/snprintf.o
+ .debug_info    0x00411d80      0x30b lib/malloc.o
+ .debug_info    0x0041208b     0x3c85 ../lib/tlsf/tlsf.o
 
 .debug_abbrev   0x00416000     0x1a00
  *(.debug_abbrev)
  .debug_abbrev  0x00416000      0x102 vm86call.o
  .debug_abbrev  0x00416102      0x319 graphics.o
  .debug_abbrev  0x0041641b      0x1d9 main.o
- .debug_abbrev  0x004165f4       0xea list_utils.o
- .debug_abbrev  0x004166de       0x4a lib/sysconf.o
- .debug_abbrev  0x00416728      0x10b lib/math.o
- .debug_abbrev  0x00416833      0x169 lib/stdio.o
- .debug_abbrev  0x0041699c      0x219 lib/stdlib.o
- .debug_abbrev  0x00416bb5      0x1c1 lib/qsort.o
- .debug_abbrev  0x00416d76      0x131 ../lib/softfloat.o
- .debug_abbrev  0x00416ea7      0x17d ../lib/string.o
- .debug_abbrev  0x00417024       0xab ../lib/memcpy.o
- .debug_abbrev  0x004170cf       0x85 ../lib/memset.o
- .debug_abbrev  0x00417154      0x226 ../lib/snprintf.o
- .debug_abbrev  0x0041737a      0x106 lib/malloc.o
- .debug_abbrev  0x00417480      0x4b6 ../lib/tlsf/tlsf.o
+ .debug_abbrev  0x004165f4       0x4a lib/sysconf.o
+ .debug_abbrev  0x0041663e      0x10b lib/math.o
+ .debug_abbrev  0x00416749      0x169 lib/stdio.o
+ .debug_abbrev  0x004168b2      0x219 lib/stdlib.o
+ .debug_abbrev  0x00416acb      0x1c1 lib/qsort.o
+ .debug_abbrev  0x00416c8c      0x164 ../lib/softfloat.o
+ .debug_abbrev  0x00416df0      0x182 ../lib/string.o
+ .debug_abbrev  0x00416f72       0xb3 ../lib/memcpy.o
+ .debug_abbrev  0x00417025       0x85 ../lib/memset.o
+ .debug_abbrev  0x004170aa      0x2f1 ../lib/snprintf.o
+ .debug_abbrev  0x0041739b      0x106 lib/malloc.o
+ .debug_abbrev  0x004174a1      0x51f ../lib/tlsf/tlsf.o
 
-.debug_line     0x00418000     0x1800
+.debug_line     0x00418000     0x4000
  *(.debug_line)
  .debug_line    0x00418000       0xa3 vm86call.o
  .debug_line    0x004180a3      0x2c1 graphics.o
  .debug_line    0x00418364      0x15c main.o
- .debug_line    0x004184c0       0x7a list_utils.o
- .debug_line    0x0041853a       0x3d lib/sysconf.o
- .debug_line    0x00418577       0x8b lib/math.o
- .debug_line    0x00418602       0xd7 lib/stdio.o
- .debug_line    0x004186d9      0x210 lib/stdlib.o
- .debug_line    0x004188e9      0x229 lib/qsort.o
- .debug_line    0x00418b12       0xaa ../lib/softfloat.o
- .debug_line    0x00418bbc      0x120 ../lib/string.o
- .debug_line    0x00418cdc      0x165 ../lib/memcpy.o
- .debug_line    0x00418e41       0xbf ../lib/memset.o
- .debug_line    0x00418f00      0x296 ../lib/snprintf.o
- .debug_line    0x00419196       0x86 lib/malloc.o
- .debug_line    0x0041921c      0x454 ../lib/tlsf/tlsf.o
+ .debug_line    0x004184c0       0x3d lib/sysconf.o
+ .debug_line    0x004184fd       0x8b lib/math.o
+ .debug_line    0x00418588       0xd7 lib/stdio.o
+ .debug_line    0x0041865f      0x210 lib/stdlib.o
+ .debug_line    0x0041886f      0x229 lib/qsort.o
+ .debug_line    0x00418a98      0x4ed ../lib/softfloat.o
+ .debug_line    0x00418f85      0x49b ../lib/string.o
+ .debug_line    0x00419420      0x7f4 ../lib/memcpy.o
+ .debug_line    0x00419c14      0x1b3 ../lib/memset.o
+ .debug_line    0x00419dc7      0x930 ../lib/snprintf.o
+ .debug_line    0x0041a6f7       0x86 lib/malloc.o
+ .debug_line    0x0041a77d     0x183b ../lib/tlsf/tlsf.o
 
-.debug_frame
+.debug_frame    0x0041c000      0xc00
  *(.debug_frame*)
+ .debug_frame   0x0041c000      0x178 ../lib/softfloat.o
+ .debug_frame   0x0041c178      0x1d0 ../lib/string.o
+ .debug_frame   0x0041c348       0xb0 ../lib/memcpy.o
+ .debug_frame   0x0041c3f8       0x4c ../lib/memset.o
+ .debug_frame   0x0041c444      0x150 ../lib/snprintf.o
+ .debug_frame   0x0041c594      0x524 ../lib/tlsf/tlsf.o
 
-.debug_str      0x0041a000      0x200
+.debug_str      0x0041d000      0x200
  *(.debug_str)
- .debug_str     0x0041a000       0x5a graphics.o
- .debug_str     0x0041a05a        0x5 lib/stdio.o
- .debug_str     0x0041a05f        0x9 lib/qsort.o
- .debug_str     0x0041a068       0x17 ../lib/memcpy.o
- .debug_str     0x0041a07f       0x16 ../lib/snprintf.o
- .debug_str     0x0041a095        0x6 lib/malloc.o
- .debug_str     0x0041a09b       0x6e ../lib/tlsf/tlsf.o
+ .debug_str     0x0041d000       0x5a graphics.o
+ .debug_str     0x0041d05a        0x5 lib/stdio.o
+ .debug_str     0x0041d05f        0x9 lib/qsort.o
+ .debug_str     0x0041d068        0x0 ../lib/softfloat.o
+ .debug_str     0x0041d068        0x0 ../lib/string.o
+ .debug_str     0x0041d068       0x17 ../lib/memcpy.o
+ .debug_str     0x0041d07f        0x0 ../lib/memset.o
+ .debug_str     0x0041d07f       0x16 ../lib/snprintf.o
+ .debug_str     0x0041d095        0x6 lib/malloc.o
+ .debug_str     0x0041d09b       0x6e ../lib/tlsf/tlsf.o
 
-.debug_loc      0x0041b000     0x8e00
+.debug_loc      0x0041e000     0x3c00
  *(.debug_loc)
- .debug_loc     0x0041b000      0x230 vm86call.o
- .debug_loc     0x0041b230      0xa06 graphics.o
- .debug_loc     0x0041bc36      0x40f main.o
- .debug_loc     0x0041c045       0xd4 list_utils.o
- .debug_loc     0x0041c119      0x2a0 lib/math.o
- .debug_loc     0x0041c3b9      0x338 lib/stdio.o
- .debug_loc     0x0041c6f1      0xd4d lib/stdlib.o
- .debug_loc     0x0041d43e     0x16cc lib/qsort.o
- .debug_loc     0x0041eb0a      0x514 ../lib/softfloat.o
- .debug_loc     0x0041f01e      0x9e4 ../lib/string.o
- .debug_loc     0x0041fa02      0x979 ../lib/memcpy.o
- .debug_loc     0x0042037b      0x23e ../lib/memset.o
- .debug_loc     0x004205b9     0x1562 ../lib/snprintf.o
- .debug_loc     0x00421b1b       0xb0 lib/malloc.o
- .debug_loc     0x00421bcb     0x21b5 ../lib/tlsf/tlsf.o
+ .debug_loc     0x0041e000      0x230 vm86call.o
+ .debug_loc     0x0041e230      0xa06 graphics.o
+ .debug_loc     0x0041ec36      0x40f main.o
+ .debug_loc     0x0041f045      0x2a0 lib/math.o
+ .debug_loc     0x0041f2e5      0x338 lib/stdio.o
+ .debug_loc     0x0041f61d      0xd4d lib/stdlib.o
+ .debug_loc     0x0042036a     0x16cc lib/qsort.o
+ .debug_loc     0x00421a36       0xb0 lib/malloc.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -529,18 +521,56 @@ LOAD ../lib/tlsf/tlsf.o
 .debug_macro
  *(.debug_macro)
 
-.debug_ranges   0x00424000      0x800
+.debug_ranges   0x00422000      0x600
  *(.debug_ranges)
- .debug_ranges  0x00424000       0xd8 graphics.o
- .debug_ranges  0x004240d8       0x18 main.o
- .debug_ranges  0x004240f0       0xb0 lib/stdlib.o
- .debug_ranges  0x004241a0      0x298 lib/qsort.o
- .debug_ranges  0x00424438       0x30 ../lib/softfloat.o
- .debug_ranges  0x00424468       0x40 ../lib/string.o
- .debug_ranges  0x004244a8       0x48 ../lib/memcpy.o
- .debug_ranges  0x004244f0       0xa0 ../lib/snprintf.o
- .debug_ranges  0x00424590      0x1d8 ../lib/tlsf/tlsf.o
+ .debug_ranges  0x00422000       0xd8 graphics.o
+ .debug_ranges  0x004220d8       0x18 main.o
+ .debug_ranges  0x004220f0       0xb0 lib/stdlib.o
+ .debug_ranges  0x004221a0      0x298 lib/qsort.o
 
 .debug_types
  *(.debug_types .gnu.linkonce.wt.*)
 OUTPUT(a.out pei-i386)
+
+.debug_loclists
+                0x00000000     0x5200
+ .debug_loclists
+                0x00000000      0x7fe ../lib/softfloat.o
+ .debug_loclists
+                0x000007fe      0x622 ../lib/string.o
+ .debug_loclists
+                0x00000e20      0xb65 ../lib/memcpy.o
+ .debug_loclists
+                0x00001985      0x15f ../lib/memset.o
+ .debug_loclists
+                0x00001ae4     0x1082 ../lib/snprintf.o
+ .debug_loclists
+                0x00002b66     0x24dc ../lib/tlsf/tlsf.o
+
+.debug_rnglists
+                0x00000000      0x800
+ .debug_rnglists
+                0x00000000       0xad ../lib/softfloat.o
+ .debug_rnglists
+                0x000000ad       0x29 ../lib/string.o
+ .debug_rnglists
+                0x000000d6       0x4a ../lib/memcpy.o
+ .debug_rnglists
+                0x00000120       0x72 ../lib/snprintf.o
+ .debug_rnglists
+                0x00000192      0x4f9 ../lib/tlsf/tlsf.o
+
+.debug_line_str
+                0x00000000      0x600
+ .debug_line_str
+                0x00000000       0xb8 ../lib/softfloat.o
+ .debug_line_str
+                0x000000b8       0xb2 ../lib/string.o
+ .debug_line_str
+                0x0000016a       0xb2 ../lib/memcpy.o
+ .debug_line_str
+                0x0000021c       0xc6 ../lib/memset.o
+ .debug_line_str
+                0x000002e2       0xdd ../lib/snprintf.o
+ .debug_line_str
+                0x000003bf       0xd1 ../lib/tlsf/tlsf.o
