@@ -14,10 +14,10 @@ timer.o: timer.c ../include/stddef.h ../include/time.h \
 machdep.o: machdep.c ../include/stddef.h ../include/syscall-nr.h \
  ../include/ioctl.h ../include/sys/mman.h ../include/sys/types.h \
  ../include/string.h kernel.h ../include/inttypes.h ../include/stdint.h \
- ../include/time.h machdep.h cpu.h fixedptc.h multiboot.h task.h
+ ../include/time.h machdep.h cpu.h fixedptc.h multiboot.h
 task.o: task.c ../include/stddef.h ../include/string.h \
  ../include/sys/types.h kernel.h ../include/inttypes.h \
- ../include/stdint.h ../include/time.h machdep.h cpu.h fixedptc.h task.h
+ ../include/stdint.h ../include/time.h machdep.h cpu.h fixedptc.h
 mktime.o: mktime.c ../include/time.h ../include/sys/types.h
 sem.o: sem.c ../include/stddef.h kernel.h ../include/sys/types.h \
  ../include/inttypes.h ../include/stdint.h ../include/time.h machdep.h \

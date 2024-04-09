@@ -41,17 +41,17 @@ void schedule()
 
     struct tcb *select = g_task_head;
     struct tcb *select_plus = g_task_running;
-    // do
-    // {
-    //     select = select->next;
-    //     if (select == NULL)
-    //         select = g_task_head;
-    //     if (select == g_task_running)
-    //         break;
-    //     if ((select->tid != 0) &&
-    //         (select->state == TASK_STATE_READY))
-    //         break;
-    // } while (1);
+    do
+    {
+        select = select->next;
+        if (select == NULL)
+            select = g_task_head;
+        if (select == g_task_running)
+            break;
+        if ((select->tid != 0) &&
+            (select->state == TASK_STATE_READY))
+            break;
+    } while (1);
     while (select != NULL)
     { // 遍历链表，计算所有线程的priority的值
         select->priority = PRI_USER_MAX -
@@ -344,4 +344,43 @@ void init_task()
      * 创建线程task0，即系统空闲线程
      */
     task0 = sys_task_create(NULL, NULL /*task0执行的函数将由run_as_task0填充*/, NULL);
+}
+int sys_getpriority(int tid)
+{
+    // tid=0，表示获取/设置当前线程的nice值，而不是task0
+    if (tid == 0)
+        return g_task_running->nice + NZERO;
+
+    uint32_t flags;
+    struct tcb *tsk;
+    save_flags_cli(flags);
+    tsk = get_task(tid);
+    restore_flags(flags);
+    return tsk->nice + NZERO; // 获取当前线程的nice值
+}
+/*把线程tid的nice设为(prio-NZERO)prio必须在[0,2*NZERO-1]内成功返回0，失败返回-1*/
+int sys_setpriority(int tid, int prio)
+{
+    uint32_t flags;
+    struct tcb *tsk;
+    if (tid == 0) // 特判tid==0情况
+    {
+        save_flags_cli(flags);
+        g_task_running->nice = prio - NZERO; // 把线程tid的nice设为(prio-NZERO)
+        restore_flags(flags);
+        return 0;
+    }
+    /*prio必须在[0,2*NZERO-1]内*/
+    if (prio < 0)
+        prio = 0;
+    if (prio > 2 * NZERO)
+        prio = 2 * NZERO;
+    /*用save_flags_cli/restore_flags保护起来*/
+    save_flags_cli(flags);
+    tsk = get_task(tid);
+    restore_flags(flags);
+    if (tsk == NULL)
+        return -1; // 设置失败返回-1
+    tsk->nice = prio - NZERO;
+    return 0;
 }
