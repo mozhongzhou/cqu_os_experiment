@@ -32,8 +32,10 @@ void isr_timer(uint32_t irq, struct context *ctx)
   g_timer_ticks++;
   // sys_putchar('.');
 
+  // if(g_task_running == NULL) g_task_running=g_task_head;
   if (g_task_running != NULL)
   {
+
     // 如果是task0在运行，则强制调度
     if (g_task_running->tid == 0)
     {
@@ -41,11 +43,39 @@ void isr_timer(uint32_t irq, struct context *ctx)
     }
     else
     {
-      // 否则，把当前线程的时间片减一
-      --g_task_running->timeslice;
+      /*每次定时器中断：g_task_running->estcpu++，task0除外！*/
+      g_task_running->estcpu = fixedpt_add(g_task_running->estcpu, FIXEDPT_ONE);
 
-      // 更新当前线程的estcpu属性
-      g_task_running->estcpu++;
+      /*每隔一秒计算一次*/
+      if (g_timer_ticks % HZ == 0)
+      {
+        int nice;
+        int nready = 0; // 表示处于就绪状态的线程个数，task0除外！
+        fixedpt ratio;
+        struct tcb *select = g_task_head;
+        while (select != NULL)
+        {
+          // if(select==NULL) break;
+
+          if (select->state == TASK_STATE_READY)
+            nready++;
+          nice = select->nice;
+          ratio = fixedpt_mul(FIXEDPT_TWO, g_load_avg); // 每秒为所有线程更新一次
+          ratio = fixedpt_div(ratio, fixedpt_add(ratio, FIXEDPT_ONE));
+          select->estcpu = fixedpt_add(fixedpt_mul(ratio, select->estcpu), fixedpt_fromint(nice));
+          select = select->next;
+        }
+
+        /*g_load_avg=(59/60) ×g_load_avg+(1/60) × nready,
+          计算系统的平均负荷g_load_avg*/
+        fixedpt r59_60 = fixedpt_div(fixedpt_fromint(59), fixedpt_fromint(60));
+        fixedpt r01_60 = fixedpt_div(FIXEDPT_ONE, fixedpt_fromint(60));
+        g_load_avg = fixedpt_add(fixedpt_mul(r59_60, g_load_avg),
+                                 fixedpt_mul(r01_60, fixedpt_fromint(nready)));
+      }
+
+      // 把当前线程的时间片减一
+      --g_task_running->timeslice;
 
       // 如果当前线程用完了时间片，也要强制调度
       if (g_task_running->timeslice <= 0)
