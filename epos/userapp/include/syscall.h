@@ -21,6 +21,8 @@ time_t time(time_t *loc);
 void beep(int freq);
 int putchar(int c);
 int getchar();
+int getpriority(int tid);
+int setpriority(int tid, int prio);
 
 struct vm86_context
 {

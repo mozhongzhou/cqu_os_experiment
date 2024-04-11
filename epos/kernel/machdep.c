@@ -25,7 +25,7 @@
 
 #include "kernel.h"
 #include "multiboot.h"
-
+#include "task.h"
 #define __CONCAT1(x, y) x##y
 #define __CONCAT(x, y) __CONCAT1(x, y)
 #define __STRING(x) #x           /* stringify without expanding x */
@@ -787,7 +787,16 @@ void syscall(struct context *ctx)
             *loc = ctx->eax;
     }
     break;
-
+    case SYSCALL_getpriority:
+        ctx->eax = sys_getpriority((*((int *)(ctx->esp + 4))));
+        break;
+    case SYSCALL_setpriority:
+    {
+        int tid = *(int *)(ctx->esp + 4);
+        int prio = *(int *)(ctx->esp + 8);
+        ctx->eax = sys_setpriority(tid, prio);
+        }
+    break;
     case SYSCALL_recv:
     case SYSCALL_send:
     case SYSCALL_ioctl:
@@ -796,6 +805,47 @@ void syscall(struct context *ctx)
         ctx->eax = -ctx->eax;
         break;
     }
+}
+int sys_getpriority(int tid)
+{
+    // tid=0，表示获取/设置当前线程的nice值，而不是task0
+    if (tid == 0)
+        return g_task_running->nice + NZERO;
+
+    uint32_t flags;
+    struct tcb *tsk;
+    save_flags_cli(flags);
+    tsk = get_task(tid);
+    restore_flags(flags);
+    return tsk->nice + NZERO; // 获取当前线程的nice值
+}
+/*把线程tid的nice设为(prio-NZERO)prio必须在[0,2*NZERO-1]内成功返回0，失败返回-1*/
+int sys_setpriority(int tid, int prio)
+{
+    uint32_t flags;
+    struct tcb *tsk;
+    if (tid == 0)
+    {
+        save_flags_cli(flags);
+        g_task_running->nice = prio - NZERO;
+        // 把线程tid的nice设为(prio-NZERO)
+        restore_flags(flags);
+        return 0;
+    }
+    /*prio必须在[0,2*NZERO-1]内*/
+    if (prio < 0)
+        prio = 0;
+    if (prio > 2 * NZERO)
+        prio = 2 * NZERO;
+    /*用save_flags_cli/restore_flags保护起来*/
+    save_flags_cli(flags);
+    tsk = get_task(tid);
+    restore_flags(flags);
+    if (tsk == NULL)
+        return -1;
+    // 设置失败返回-1
+    tsk->nice = prio - NZERO;
+    return 0;
 }
 time_t sys_time()
 {

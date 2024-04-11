@@ -36,6 +36,8 @@
 #define SYSCALL_recv 183
 #define SYSCALL_send 184
 #define SYSCALL_ioctl 185
+#define SYSCALL_setpriority 186
+#define SYSCALL_getpriority 187
 
 #define SYSCALL_putchar 1000
 #define SYSCALL_getchar 1001

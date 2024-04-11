@@ -175,7 +175,7 @@ int sys_getchar();
  * @param tid 线程ID
  * @return 线程的优先级（nice + NZERO），失败返回 -1
  */
-int getpriority(int tid);
+int sys_getpriority(int tid);
 
 /**
  * 设置线程优先级
@@ -183,7 +183,7 @@ int getpriority(int tid);
  * @param prio 优先级，范围 [0,2*NZERO-1]
  * @return 成功返回 0，失败返回 -1
  */
-int setpriority(int tid, int prio);
+int sys_setpriority(int tid, int prio);
 
 struct tcb *sys_task_create(void *tos, void (*func)(void *pv), void *pv);
 void sys_task_exit(int code_exit);
