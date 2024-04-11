@@ -795,7 +795,7 @@ void syscall(struct context *ctx)
         int tid = *(int *)(ctx->esp + 4);
         int prio = *(int *)(ctx->esp + 8);
         ctx->eax = sys_setpriority(tid, prio);
-        }
+    }
     break;
     case SYSCALL_recv:
     case SYSCALL_send:
@@ -970,6 +970,7 @@ static void md_startup(uint32_t mbi, uint32_t physfree)
 /**
  * 这个函数是内核的C语言入口，被entry.S调用
  */
+// entry 断点 step 就是这个函数 cstart
 void cstart(uint32_t magic, uint32_t mbi)
 {
     uint32_t i, _end = PAGE_ROUNDUP(R((uint32_t)(&end)));
