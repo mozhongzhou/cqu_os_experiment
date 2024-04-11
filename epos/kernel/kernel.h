@@ -169,20 +169,7 @@ int do_page_fault(struct context *ctx, uint32_t vaddr, uint32_t code);
 
 int sys_putchar(int c);
 int sys_getchar();
-
-/**
- * 获取线程优先级
- * @param tid 线程ID
- * @return 线程的优先级（nice + NZERO），失败返回 -1
- */
 int sys_getpriority(int tid);
-
-/**
- * 设置线程优先级
- * @param tid  线程ID
- * @param prio 优先级，范围 [0,2*NZERO-1]
- * @return 成功返回 0，失败返回 -1
- */
 int sys_setpriority(int tid, int prio);
 
 struct tcb *sys_task_create(void *tos, void (*func)(void *pv), void *pv);
