@@ -52,3 +52,9 @@ add-symbol-file kernel/eposkrnl.out 0xc0100000
 break entry
 continue
 disassemble + point
+
+
+
+
+
+![image-20240413182309089](https://raw.githubusercontent.com/mozhongzhou/myPict_img/main/pic/image-20240413182309089.png)

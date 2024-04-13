@@ -579,7 +579,7 @@ int exception(struct context *ctx)
             printk("fpu.fos=0x%04x\r\n", g_task_own_fpu->fpu.fos);
         }
     }
-
+    ////////////////////////////?
     printk("Un-handled exception!\r\n");
     printk(" fs=0x%08x,  es=0x%08x,  ds=0x%08x\r\n",
            ctx->fs, ctx->es, ctx->ds);
@@ -818,6 +818,8 @@ int sys_getpriority(int tid)
     tsk = get_task(tid);
     restore_flags(flags);
     return tsk->nice + NZERO; // 获取当前线程的nice值
+
+    ////判断
 }
 /*把线程tid的nice设为(prio-NZERO)prio必须在[0,2*NZERO-1]内成功返回0，失败返回-1*/
 int sys_setpriority(int tid, int prio)
@@ -835,8 +837,8 @@ int sys_setpriority(int tid, int prio)
     /*prio必须在[0,2*NZERO-1]内*/
     if (prio < 0)
         prio = 0;
-    if (prio > 2 * NZERO)
-        prio = 2 * NZERO;
+    if (prio > 2 * NZERO - 1)
+        prio = 2 * NZERO - 1;
     /*用save_flags_cli/restore_flags保护起来*/
     save_flags_cli(flags);
     tsk = get_task(tid);

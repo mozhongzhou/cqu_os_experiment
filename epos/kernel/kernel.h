@@ -97,7 +97,9 @@ struct tcb
     int nice;       // 静态优先级
     fixedpt estcpu; // 线程最近使用了多少CPU时间
     int priority;   // 线程的动态优先级
+
     struct tcb *next;
+
     struct fpu fpu; // 数学协处理器的寄存器
 
     uint32_t signature; // 必须是最后一个字段
@@ -169,6 +171,7 @@ int do_page_fault(struct context *ctx, uint32_t vaddr, uint32_t code);
 
 int sys_putchar(int c);
 int sys_getchar();
+
 int sys_getpriority(int tid);
 int sys_setpriority(int tid, int prio);
 

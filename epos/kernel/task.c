@@ -41,7 +41,7 @@ void schedule()
 
     struct tcb *select = g_task_head;
     struct tcb *select_plus = g_task_running;
-
+    /////////////////////
     while (select != NULL)
     { // 遍历链表，计算所有线程的priority的值
         select->priority = PRI_USER_MAX -
@@ -49,7 +49,7 @@ void schedule()
                            select->nice * 2;
         select = select->next;
     }
-
+    //////////////////
     select = g_task_head;
     while (select != NULL)
     {
@@ -60,6 +60,8 @@ void schedule()
         }
         select = select->next;
     }
+
+    ////////////////////
 
     if (select_plus == g_task_running)
     {
