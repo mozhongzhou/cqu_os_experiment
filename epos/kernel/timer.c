@@ -23,19 +23,20 @@
 
 /*记录系统启动以来，定时器中断的次数*/
 unsigned volatile g_timer_ticks = 0;
-fixedpt g_load_avg = 0; // （表示系统的平均负荷，初值为0）
+
+/*实验三、定义全局变量g_load_avg*/
+fixedpt g_load_avg = 0;
+
 /**
  * 定时器的中断处理程序
  */
+
 void isr_timer(uint32_t irq, struct context *ctx)
 {
+  // 首先，在 isr_timer 函数中，全局计时器 g_timer_ticks 被递增，表示经过了一个时钟周期。
   g_timer_ticks++;
-  // sys_putchar('.');
-
-  // if(g_task_running == NULL) g_task_running=g_task_head;
   if (g_task_running != NULL)
   {
-
     // 如果是task0在运行，则强制调度
     if (g_task_running->tid == 0)
     {
@@ -43,38 +44,7 @@ void isr_timer(uint32_t irq, struct context *ctx)
     }
     else
     {
-      /*每次定时器中断：g_task_running->estcpu++，task0除外！*/
-      g_task_running->estcpu = fixedpt_add(g_task_running->estcpu, FIXEDPT_ONE);
-
-      /*每隔一秒计算一次*/
-      if (g_timer_ticks % HZ == 0)
-      {
-        int nice;
-        int nready = 0; // 表示处于就绪状态的线程个数，task0除外！
-        fixedpt ratio;
-        struct tcb *select = g_task_head;
-        while (select != NULL)
-        {
-          // if(select==NULL) break;
-
-          if (select->state == TASK_STATE_READY)
-            nready++;
-          nice = select->nice;
-          ratio = fixedpt_mul(FIXEDPT_TWO, g_load_avg); // 每秒为所有线程更新一次
-          ratio = fixedpt_div(ratio, fixedpt_add(ratio, FIXEDPT_ONE));
-          select->estcpu = fixedpt_add(fixedpt_mul(ratio, select->estcpu), fixedpt_fromint(nice));
-          select = select->next;
-        }
-
-        /*g_load_avg=(59/60) ×g_load_avg+(1/60) × nready,
-          计算系统的平均负荷g_load_avg*/
-        fixedpt r59_60 = fixedpt_div(fixedpt_fromint(59), fixedpt_fromint(60));
-        fixedpt r01_60 = fixedpt_div(FIXEDPT_ONE, fixedpt_fromint(60));
-        g_load_avg = fixedpt_add(fixedpt_mul(r59_60, g_load_avg),
-                                 fixedpt_mul(r01_60, fixedpt_fromint(nready)));
-      }
-
-      // 把当前线程的时间片减一
+      // 否则，把当前线程的时间片减一
       --g_task_running->timeslice;
 
       // 如果当前线程用完了时间片，也要强制调度
@@ -82,6 +52,36 @@ void isr_timer(uint32_t irq, struct context *ctx)
       {
         g_resched = 1;
         g_task_running->timeslice = TASK_TIMESLICE_DEFAULT;
+      }
+
+      g_task_running->estcpu = fixedpt_add(g_task_running->estcpu, FIXEDPT_ONE);
+
+      if (g_timer_ticks % HZ == 0)
+      {
+        int nready = 0; // nready represents the thread be already.
+        struct tcb *tsk = g_task_head;
+        while (tsk != NULL)
+        {
+          if (tsk->state == TASK_STATE_READY)
+            nready++;
+
+          fixedpt ratio;
+          ratio = fixedpt_mul(FIXEDPT_TWO, g_load_avg);
+          ratio = fixedpt_div(ratio, fixedpt_add(ratio, FIXEDPT_ONE));
+          tsk->estcpu = fixedpt_add(fixedpt_mul(ratio, tsk->estcpu),
+                                    fixedpt_fromint(tsk->nice));
+          tsk = tsk->next;
+        }
+
+        // 对于所有状态为就绪的任务，代码会遍历它们，并根据一定的公式更新它们的 estcpu 值。
+        // 这个公式中，除了一个固定的增量之外，还有一个根据任务的 nice 值计算出的增量。
+        // nice 值是一个表示任务优先级的参数，较小的 nice 值意味着更高的优先级，较大的 nice 值意味着更低的优先级。
+        // 因此，根据任务的 nice 值不同，它们的 estcpu 值会有所调整，影响了它们在多线程环境中的调度顺序。
+
+        fixedpt r59_60 = fixedpt_div(fixedpt_fromint(59), fixedpt_fromint(60));
+        fixedpt r01_60 = fixedpt_div(FIXEDPT_ONE, fixedpt_fromint(60));
+        g_load_avg = fixedpt_add(fixedpt_mul(r59_60, g_load_avg),
+                                 fixedpt_mul(r01_60, fixedpt_fromint(nready)));
       }
     }
   }

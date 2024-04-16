@@ -25,7 +25,7 @@
 
 #include "kernel.h"
 #include "multiboot.h"
-#include "task.h"
+
 #define __CONCAT1(x, y) x##y
 #define __CONCAT(x, y) __CONCAT1(x, y)
 #define __STRING(x) #x           /* stringify without expanding x */
@@ -44,10 +44,6 @@ time_t g_startup_time;
 #define IRQ_SLAVE 0x04
 #define ICU_SLAVEID 2
 #define ICU_IMR_OFFSET 1 /* IO_ICU{1,2} + 1 */
-#define NZERO 20
-#define PRI_USER_MIN 0
-#define PRI_USER_MAX 127
-
 /**
  * 初始化i8259中断控制器
  */
@@ -579,7 +575,7 @@ int exception(struct context *ctx)
             printk("fpu.fos=0x%04x\r\n", g_task_own_fpu->fpu.fos);
         }
     }
-    ////////////////////////////?
+
     printk("Un-handled exception!\r\n");
     printk(" fs=0x%08x,  es=0x%08x,  ds=0x%08x\r\n",
            ctx->fs, ctx->es, ctx->ds);
@@ -777,83 +773,37 @@ void syscall(struct context *ctx)
     case SYSCALL_getchar:
         ctx->eax = sys_getchar();
         break;
+    case SYSCALL_recv:
+    case SYSCALL_send:
+    case SYSCALL_ioctl:
     case SYSCALL_time:
     {
         time_t *loc = *(time_t **)(ctx->esp + 4);
-
         ctx->eax = sys_time();
-
         if (loc != NULL)
             *loc = ctx->eax;
     }
     break;
     case SYSCALL_getpriority:
-        ctx->eax = sys_getpriority((*((int *)(ctx->esp + 4))));
-        break;
+    {
+        int tid = *(int *)(ctx->esp + 4);
+        ctx->eax = sys_getpriority(tid);
+    }
+    break;
     case SYSCALL_setpriority:
     {
         int tid = *(int *)(ctx->esp + 4);
-        int prio = *(int *)(ctx->esp + 8);
-        ctx->eax = sys_setpriority(tid, prio);
+        int nice = *(int *)(ctx->esp + 8);
+        ctx->eax = sys_setpriority(tid, nice);
     }
     break;
-    case SYSCALL_recv:
-    case SYSCALL_send:
-    case SYSCALL_ioctl:
     default:
         printk("syscall #%d not implemented.\r\n", ctx->eax);
         ctx->eax = -ctx->eax;
         break;
     }
 }
-int sys_getpriority(int tid)
-{
-    // tid=0，表示获取/设置当前线程的nice值，而不是task0
-    if (tid == 0)
-        return g_task_running->nice + NZERO;
 
-    uint32_t flags;
-    struct tcb *tsk;
-    save_flags_cli(flags);
-    tsk = get_task(tid);
-    restore_flags(flags);
-    return tsk->nice + NZERO; // 获取当前线程的nice值
-
-    ////判断
-}
-/*把线程tid的nice设为(prio-NZERO)prio必须在[0,2*NZERO-1]内成功返回0，失败返回-1*/
-int sys_setpriority(int tid, int prio)
-{
-    uint32_t flags;
-    struct tcb *tsk;
-    if (tid == 0)
-    {
-        save_flags_cli(flags);
-        g_task_running->nice = prio - NZERO;
-        // 把线程tid的nice设为(prio-NZERO)
-        restore_flags(flags);
-        return 0;
-    }
-    /*prio必须在[0,2*NZERO-1]内*/
-    if (prio < 0)
-        prio = 0;
-    if (prio > 2 * NZERO - 1)
-        prio = 2 * NZERO - 1;
-    /*用save_flags_cli/restore_flags保护起来*/
-    save_flags_cli(flags);
-    tsk = get_task(tid);
-    restore_flags(flags);
-    if (tsk == NULL)
-        return -1;
-    // 设置失败返回-1
-    tsk->nice = prio - NZERO;
-    return 0;
-}
-time_t sys_time()
-{
-    time_t curTime = g_startup_time + g_timer_ticks / HZ;
-    return curTime;
-}
 /**
  * 初始化分页子系统
  */
@@ -972,7 +922,6 @@ static void md_startup(uint32_t mbi, uint32_t physfree)
 /**
  * 这个函数是内核的C语言入口，被entry.S调用
  */
-// entry 断点 step 就是这个函数 cstart
 void cstart(uint32_t magic, uint32_t mbi)
 {
     uint32_t i, _end = PAGE_ROUNDUP(R((uint32_t)(&end)));
@@ -1052,4 +1001,66 @@ void cstart(uint32_t magic, uint32_t mbi)
      * 机器无关（Machine Independent）的初始化
      */
     mi_startup();
+}
+
+time_t sys_time()
+{
+    time_t mytime = (g_timer_ticks / HZ) + g_startup_time;
+    return mytime;
+}
+
+int sys_getpriority(int tid)
+{
+    //
+    uint32_t flags;
+    struct tcb *tsk;
+    //
+    save_flags_cli(flags);
+    tsk = g_task_head;
+    while (tsk != NULL)
+    {
+        if (tsk->tid == tid)
+            break;
+        tsk = tsk->next;
+    }
+    //
+    restore_flags(flags);
+    if (tsk == NULL) // 失败
+        return -1;
+    else // 设置nice值
+        return tsk->nice + NZERO;
+}
+
+int sys_setpriority(int tid, int nice)
+{
+    int edgePrio = 2 * NZERO - 1;      // 39
+    if (nice >= 0 && nice <= edgePrio) // 合理情况
+    {
+        if (tid == 0)
+        {
+            g_task_running->nice = nice - NZERO;
+            return 0;
+        }
+        //
+        uint32_t flags;
+        struct tcb *tsk;
+        //
+        save_flags_cli(flags);
+        tsk = g_task_head;
+        while (tsk != NULL)
+        {
+            if (tsk->tid == tid)
+                break;
+            tsk = tsk->next;
+        }
+        //
+        restore_flags(flags);
+        if (tsk == NULL)
+            return -1;
+        else
+            tsk->nice = nice - NZERO;
+        return 0;
+    }
+    else
+        return -1;
 }

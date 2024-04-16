@@ -20,9 +20,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "kernel.h"
-#define NZERO 20
-#define PRI_USER_MIN 0
-#define PRI_USER_MAX 127
+
 int g_resched;
 struct tcb *g_task_head;
 struct tcb *g_task_running;
@@ -30,53 +28,45 @@ struct tcb *task0;
 struct tcb *g_task_own_fpu;
 
 /**
- * CPU调度器函数，这里只实现了轮转调度算法
+ * CPU调度器函数，这里（以前是）只实现了轮转调度算法 (现在是优先级调度算法)
  *
  * 注意：该函数的执行不能被中断
  */
-
-/*********动态优先级调度*************/
 void schedule()
 {
-
     struct tcb *select = g_task_head;
-    struct tcb *select_plus = g_task_running;
-    /////////////////////
+    struct tcb *high = g_task_running;
+    // 设置任务优先级（priority）
     while (select != NULL)
-    { // 遍历链表，计算所有线程的priority的值
-        select->priority = PRI_USER_MAX -
-                           fixedpt_toint(fixedpt_div(select->estcpu, fixedpt_fromint(4))) -
-                           select->nice * 2;
+    {
+        select->priority = PRI_USER_MAX - fixedpt_toint(fixedpt_div(select->estcpu, fixedpt_fromint(4))) - select->nice * 2;
         select = select->next;
     }
-    //////////////////
     select = g_task_head;
+    // 选择优先级最高的任务：
     while (select != NULL)
     {
         if ((select->tid != 0) && (select->state == TASK_STATE_READY))
         {
-            if (select->priority > select_plus->priority || select_plus->tid == 0)
-                select_plus = select; // 选择等待队列中优先级最高的线程
+            if (high->priority < select->priority)
+            {
+                high = select;
+            }
+            if (high->tid == 0)
+                high = select;
         }
         select = select->next;
     }
-
-    ////////////////////
-
-    if (select_plus == g_task_running)
+    // 检查是否需要切换任务：
+    if (high == g_task_running)
     {
-        if (select->state == TASK_STATE_READY)
+        if (high->state == TASK_STATE_READY)
             return;
-        select_plus = task0;
+        high = task0;
     }
-
-    // printk("0x%d -> 0x%d\r\n", (g_task_running == NULL) ? -1 : g_task_running->tid, select->tid);
-
-    if (select->signature != TASK_SIGNATURE)
-        printk("warning: kernel stack of task #%d overflow!!!", select->tid);
-
-    g_resched = 0;
-    switch_to(select_plus);
+    // 标记是否需要重新调度：
+    // 在整个调度过程结束后，将 g_resched 标志设为 0，表示不需要重新调度。 g_resched = 0;
+    switch_to(high);
 }
 
 /**
@@ -171,7 +161,7 @@ static void remove_task(struct tcb *tsk)
     }
 }
 
-struct tcb *get_task(int tid)
+static struct tcb *get_task(int tid)
 {
     struct tcb *tsk;
 
@@ -211,6 +201,9 @@ struct tcb *sys_task_create(void *tos,
 
     memset(new, 0, sizeof(struct tcb));
 
+    new->nice = 0; // 初始化nice
+    new->estcpu = 0;
+    new->priority = 0;
     new->kstack = (uint32_t)(p + PAGE_SIZE);
     new->tid = tid++;
     new->state = TASK_STATE_READY;
@@ -218,10 +211,7 @@ struct tcb *sys_task_create(void *tos,
     new->wq_exit = NULL;
     new->next = NULL;
     new->signature = TASK_SIGNATURE;
-    // 新增初始化nice字段为0
-    new->nice = 0;
-    new->estcpu = 0;
-    new->priority = 0;
+
     /*XXX - should be elsewhere*/
     new->fpu.cwd = 0x37f;
     new->fpu.twd = 0xffff;

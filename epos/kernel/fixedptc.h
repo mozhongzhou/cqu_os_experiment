@@ -69,25 +69,25 @@
  */
 
 #ifndef FIXEDPT_BITS
-#define FIXEDPT_BITS 32
+#define FIXEDPT_BITS	32
 #endif
 
 #if FIXEDPT_BITS == 32
 typedef int32_t fixedpt;
-typedef int64_t fixedptd;
-typedef uint32_t fixedptu;
-typedef uint64_t fixedptud;
+typedef	int64_t	fixedptd;
+typedef	uint32_t fixedptu;
+typedef	uint64_t fixedptud;
 #elif FIXEDPT_BITS == 64
 typedef int64_t fixedpt;
-typedef __int128_t fixedptd;
-typedef uint64_t fixedptu;
-typedef __uint128_t fixedptud;
+typedef	__int128_t fixedptd;
+typedef	uint64_t fixedptu;
+typedef	__uint128_t fixedptud;
 #else
 #error "FIXEDPT_BITS must be equal to 32 or 64"
 #endif
 
 #ifndef FIXEDPT_WBITS
-#define FIXEDPT_WBITS 24
+#define FIXEDPT_WBITS	24
 #endif
 
 #if FIXEDPT_WBITS >= FIXEDPT_BITS
@@ -96,29 +96,30 @@ typedef __uint128_t fixedptud;
 
 #define FIXEDPT_VCSID "$Id$"
 
-#define FIXEDPT_FBITS (FIXEDPT_BITS - FIXEDPT_WBITS)
-#define FIXEDPT_FMASK (((fixedpt)1 << FIXEDPT_FBITS) - 1)
+#define FIXEDPT_FBITS	(FIXEDPT_BITS - FIXEDPT_WBITS)
+#define FIXEDPT_FMASK	(((fixedpt)1 << FIXEDPT_FBITS) - 1)
 
 #define fixedpt_rconst(R) ((fixedpt)((R) * FIXEDPT_ONE + ((R) >= 0 ? 0.5 : -0.5)))
 #define fixedpt_fromint(I) ((fixedptd)(I) << FIXEDPT_FBITS)
 #define fixedpt_toint(F) ((F) >> FIXEDPT_FBITS)
-#define fixedpt_add(A, B) ((A) + (B))
-#define fixedpt_sub(A, B) ((A) - (B))
-#define fixedpt_xmul(A, B) \
+#define fixedpt_add(A,B) ((A) + (B))
+#define fixedpt_sub(A,B) ((A) - (B))
+#define fixedpt_xmul(A,B)						\
 	((fixedpt)(((fixedptd)(A) * (fixedptd)(B)) >> FIXEDPT_FBITS))
-#define fixedpt_xdiv(A, B) \
+#define fixedpt_xdiv(A,B)						\
 	((fixedpt)(((fixedptd)(A) << FIXEDPT_FBITS) / (fixedptd)(B)))
 #define fixedpt_fracpart(A) ((fixedpt)(A) & FIXEDPT_FMASK)
 
-#define FIXEDPT_ONE ((fixedpt)((fixedpt)1 << FIXEDPT_FBITS))
+#define FIXEDPT_ONE	((fixedpt)((fixedpt)1 << FIXEDPT_FBITS))
 #define FIXEDPT_ONE_HALF (FIXEDPT_ONE >> 1)
-#define FIXEDPT_TWO (FIXEDPT_ONE + FIXEDPT_ONE)
-#define FIXEDPT_PI fixedpt_rconst(3.14159265358979323846)
-#define FIXEDPT_TWO_PI fixedpt_rconst(2 * 3.14159265358979323846)
-#define FIXEDPT_HALF_PI fixedpt_rconst(3.14159265358979323846 / 2)
-#define FIXEDPT_E fixedpt_rconst(2.7182818284590452354)
+#define FIXEDPT_TWO	(FIXEDPT_ONE + FIXEDPT_ONE)
+#define FIXEDPT_PI	fixedpt_rconst(3.14159265358979323846)
+#define FIXEDPT_TWO_PI	fixedpt_rconst(2 * 3.14159265358979323846)
+#define FIXEDPT_HALF_PI	fixedpt_rconst(3.14159265358979323846 / 2)
+#define FIXEDPT_E	fixedpt_rconst(2.7182818284590452354)
 
 #define fixedpt_abs(A) ((A) < 0 ? -(A) : (A))
+
 
 /* Multiplies two fixedpt numbers, returns the result. */
 static __inline fixedpt
@@ -126,6 +127,7 @@ fixedpt_mul(fixedpt A, fixedpt B)
 {
 	return (((fixedptd)A * (fixedptd)B) >> FIXEDPT_FBITS);
 }
+
 
 /* Divides two fixedpt numbers, returns the result. */
 static __inline fixedpt
@@ -168,15 +170,13 @@ fixedpt_str(fixedpt A, char *str, int max_dec)
 	else if (max_dec == -2)
 		max_dec = 15;
 
-	if (A < 0)
-	{
+	if (A < 0) {
 		str[slen++] = '-';
 		A *= -1;
 	}
 
 	ip = fixedpt_toint(A);
-	do
-	{
+	do {
 		tmp[ndec++] = '0' + ip % 10;
 		ip /= 10;
 	} while (ip != 0);
@@ -186,16 +186,15 @@ fixedpt_str(fixedpt A, char *str, int max_dec)
 	str[slen++] = '.';
 
 	fr = (fixedpt_fracpart(A) << FIXEDPT_WBITS) & mask;
-	do
-	{
+	do {
 		fr = (fr & mask) * 10;
 
 		str[slen++] = '0' + (fr >> FIXEDPT_BITS) % 10;
 		ndec++;
 	} while (fr != 0 && ndec < max_dec);
 
-	if (ndec > 1 && str[slen - 1] == '0')
-		str[slen - 1] = '\0'; /* cut off trailing 0 */
+	if (ndec > 1 && str[slen-1] == '0')
+		str[slen-1] = '\0'; /* cut off trailing 0 */
 	else
 		str[slen] = '\0';
 }

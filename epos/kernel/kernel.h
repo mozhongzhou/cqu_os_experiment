@@ -19,17 +19,15 @@
  */
 #ifndef _KERNEL_H
 #define _KERNEL_H
-
+#define NZERO 20
+#define PRI_USER_MIN 0
+#define PRI_USER_MAX 127
 #include <sys/types.h>
 #include <inttypes.h>
 #include <time.h>
 #include "machdep.h"
 #include "fixedptc.h"
 
-// 线程相关的宏定义
-#define NZERO 20
-#define PRI_USER_MIN 0
-#define PRI_USER_MAX 127
 /*中断向量表*/
 extern void (*g_intr_vector[])(uint32_t irq, struct context *ctx);
 
@@ -50,6 +48,7 @@ extern time_t g_startup_time;
 
 time_t mktime(struct tm *tm);
 
+/*加入声明*/
 time_t sys_time();
 
 /**
@@ -94,13 +93,13 @@ struct tcb
     int code_exit;              // 保存该线程的退出代码
     struct wait_queue *wq_exit; // 等待该线程退出的队列
 
-    int nice;       // 静态优先级
-    fixedpt estcpu; // 线程最近使用了多少CPU时间
-    int priority;   // 线程的动态优先级
-
     struct tcb *next;
-
     struct fpu fpu; // 数学协处理器的寄存器
+
+    // 动态优先级调度  nice、priority、estcpu声明
+    int nice;
+    int priority;
+    fixedpt estcpu;
 
     uint32_t signature; // 必须是最后一个字段
 #define TASK_SIGNATURE 0x20160201
@@ -172,14 +171,14 @@ int do_page_fault(struct context *ctx, uint32_t vaddr, uint32_t code);
 int sys_putchar(int c);
 int sys_getchar();
 
-int sys_getpriority(int tid);
-int sys_setpriority(int tid, int prio);
-
 struct tcb *sys_task_create(void *tos, void (*func)(void *pv), void *pv);
 void sys_task_exit(int code_exit);
 int sys_task_wait(int tid, int *pcode_exit);
 int sys_task_getid();
 void sys_task_yield();
+
+int sys_getpriority(int tid);
+int sys_setpriority(int tid, int nice);
 
 int printk(const char *fmt, ...);
 
@@ -188,7 +187,6 @@ uint32_t page_alloc(int npages, uint32_t prot, uint32_t user);
 uint32_t page_alloc_in_addr(uint32_t va, int npages, uint32_t prot);
 int page_free(uint32_t va, int npages);
 uint32_t page_prot(uint32_t va);
-
 #define VM_PROT_NONE 0x00
 #define VM_PROT_READ 0x01
 #define VM_PROT_WRITE 0x02

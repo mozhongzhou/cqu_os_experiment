@@ -19,7 +19,21 @@
         "io.h": "c",
         "syscall.h": "c",
         "kernel.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "*.tcc": "c",
+        "vector": "c",
+        "exception": "c",
+        "functional": "c",
+        "iosfwd": "c",
+        "istream": "c",
+        "new": "c",
+        "optional": "c",
+        "ostream": "c",
+        "sstream": "c",
+        "stdexcept": "c",
+        "system_error": "c",
+        "typeinfo": "c",
+        "cstdint": "c"
     },
     "git.ignoreLimitWarning": true
 }
