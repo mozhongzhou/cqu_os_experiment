@@ -204,6 +204,7 @@ struct tcb *sys_task_create(void *tos,
     new->nice = 0; // 初始化nice
     new->estcpu = 0;
     new->priority = 0;
+
     new->kstack = (uint32_t)(p + PAGE_SIZE);
     new->tid = tid++;
     new->state = TASK_STATE_READY;

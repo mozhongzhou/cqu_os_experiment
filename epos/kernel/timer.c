@@ -24,7 +24,7 @@
 /*记录系统启动以来，定时器中断的次数*/
 unsigned volatile g_timer_ticks = 0;
 
-/*实验三、定义全局变量g_load_avg*/
+// 定义全局变量
 fixedpt g_load_avg = 0;
 
 /**

@@ -36,11 +36,11 @@ kernel.ld: kernel.ld.in
 	$(CC) -E -P -x c-header -o $@ $^
 
 .PHONY: debug
-debug: CFLAGS+=-O0 -ggdb
+debug: CFLAGS+=-std=c99 -O0 -ggdb
 debug: $(PROG).bin
 
 .PHONY: run
-run: CFLAGS+=-O2 -ggdb
+run: CFLAGS+=-std=c99 -O2 -ggdb
 run: $(PROG).bin
 
 .PHONY: clean
