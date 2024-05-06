@@ -47,7 +47,8 @@ void __main()
 void main(void *pv)
 {
     srand(time(NULL));
-    for (int i = 0, temp; i < N; i++)
+    int i, temp;
+    for (i = 0; i < N; i++)
     {
         temp = rand() % 400;
         ary1[i] = temp;
@@ -93,7 +94,8 @@ void tsk_1(void *pv)
 {
 
     int gap = 2;
-    for (int i = 0; i < N; i++)
+    int i;
+    for (i = 0; i < N; i++)
     {
         line(0, i * gap, ary1[i], i * gap, RGB(128, 0, 128));
     }
@@ -104,7 +106,8 @@ void tsk_2(void *pv)
 {
 
     int gap = 2;
-    for (int i = 0; i < N; i++)
+    int i;
+    for (i = 0; i < N; i++)
     {
         line(400, i * gap, 400 + ary2[i], i * gap, RGB(255, 165, 0));
     }

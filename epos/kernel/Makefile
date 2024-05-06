@@ -48,11 +48,11 @@ kernel.ld: kernel.ld.in
 	$(CC) -E -P -x c-header -o $@ $^
 
 .PHONY: debug
-debug: CFLAGS+=-std=c99 -O0 -ggdb
+debug: CFLAGS+= -O0 -ggdb
 debug: make.dep $(PROG).bin
 
 .PHONY: run
-run: CFLAGS+=-std=c99 -O2 -ggdb
+run: CFLAGS+= -O2 -ggdb
 run: make.dep $(PROG).bin
 
 .PHONY: clean

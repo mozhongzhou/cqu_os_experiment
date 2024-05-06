@@ -911,6 +911,75 @@ void syscall(struct context *ctx)
 }
 
 /**
+ * page fault处理函数。
+ * 特别注意：此时系统的中断处于打开状态
+ */
+int do_page_fault(struct context *ctx, uint32_t vaddr, uint32_t code)
+{
+    uint32_t prot;
+
+#if VERBOSE
+    printk("PF:0x%08x(0x%04x)", vaddr, code);
+#endif
+
+    /*检查地址是否合法*/
+    prot = page_prot(vaddr);
+    if (prot == -1 || prot == VM_PROT_NONE)
+    {
+#if VERBOSE
+        printk("->ILLEGAL MEMORY ACCESS\r\n");
+#endif
+        return -1;
+    }
+
+    if (code & PTE_V)
+    {
+        /*页面保护引起PF*/
+#if VERBOSE
+        printk("->PROTECTION VIOLATION\r\n");
+#endif
+        return -1;
+    }
+
+    {
+        uint32_t paddr;
+        uint32_t flags = PTE_V;
+
+        if (prot & VM_PROT_WRITE)
+            flags |= PTE_W;
+
+        /*只要访问用户的地址空间，都代表用户模式访问*/
+        if (vaddr < KERN_MIN_ADDR)
+            flags |= PTE_U;
+
+        /*搜索空闲帧*/
+        paddr = frame_alloc(1);
+        if (paddr != SIZE_MAX)
+        {
+            /*找到空闲帧*/
+            *vtopte(vaddr) = paddr | flags;
+            memset((void *)(PAGE_TRUNCATE(vaddr)), 0, PAGE_SIZE);
+            invlpg(vaddr);
+
+#if VERBOSE
+            printk("->0x%08x\r\n", *vtopte(vaddr));
+#endif
+
+            return 0;
+        }
+        else
+        {
+            /*物理内存已耗尽*/
+#if VERBOSE
+            printk("->OUT OF RAM\r\n");
+#endif
+        }
+    }
+
+    return -1;
+}
+
+/**
  * 初始化分页子系统
  */
 static uint32_t init_paging(uint32_t physfree)

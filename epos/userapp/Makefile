@@ -44,11 +44,11 @@ make.dep: *.c *.h
 ../lib/string.o: .FORCE
 
 .PHONY: debug
-debug: CFLAGS+=-std=c99 -O0 -ggdb
+debug: CFLAGS+=-O0 -ggdb
 debug: make.dep $(PROG).out
 
 .PHONY: run
-run: CFLAGS+=-std=c99 -O2 -ggdb
+run: CFLAGS+=-O2 -ggdb
 run: make.dep $(PROG).out
 
 .PHONY: clean
