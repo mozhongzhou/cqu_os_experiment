@@ -35,6 +35,8 @@ void isr_timer(uint32_t irq, struct context *ctx)
 {
   // 首先，在 isr_timer 函数中，全局计时器 g_timer_ticks 被递增，表示经过了一个时钟周期。
   g_timer_ticks++;
+  // sys_putchar('.');
+
   if (g_task_running != NULL)
   {
     // 如果是task0在运行，则强制调度
@@ -171,7 +173,7 @@ static void _delay(unsigned num, unsigned denom)
 {
   /* Scale the numerator and denominator down by 1000 to avoid
      the possibility of overflow. */
-  busy_wait(loops_per_tick * num / 1000 * HZ / (denom / 1000));
+  busy_wait(loops_per_tick / (denom / 1000) * (num / 1000) * HZ);
 }
 
 static void do_sleep(unsigned num, unsigned denom)
@@ -209,7 +211,17 @@ int sys_nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
 {
   if (rqtp->tv_sec > 0)
     do_sleep(rqtp->tv_sec, 1);
-  if (rqtp->tv_nsec > 0)
-    do_sleep(rqtp->tv_nsec, 1000 * 1000 * 1000);
+
+  long nsec = rqtp->tv_nsec,
+       nhz = 1000 * 1000 * 1000 / HZ,
+       ticks = nsec / nhz;
+  if (ticks > 0)
+  {
+    do_sleep(ticks, HZ);
+    nsec %= nhz;
+  }
+  if (nsec > 0)
+    do_sleep(nsec, 1000 * 1000 * 1000);
+
   return 0;
 }

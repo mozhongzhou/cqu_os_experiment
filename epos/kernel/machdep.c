@@ -279,6 +279,7 @@ static void init_gdt(void)
     memset(&tss, 0, sizeof(struct tss));
     tss.ss0 = GSEL_KDATA * sizeof(gdt[0]);
     tss.esp0 = (uint32_t)&tmp_stack;
+    tss.iomap_base = limit; /*no I/O permission map*/
 
     __asm__ __volatile__(
         "movw %0, %%ax\n\t"
@@ -532,10 +533,7 @@ int exception(struct context *ctx)
                 return 0;
             else
             {
-                // This exception cannot be eaten by vm86mon, return to user mode
-                struct context *c = (struct context *)(((uint8_t *)g_task_running) + PAGE_SIZE -
-                                                       sizeof(struct context));
-                **((struct vm86_context **)(c->esp + 4)) = *((struct vm86_context *)ctx);
+                // This exception cannot be eaten by vm86mon, return to caller
                 return 1;
             }
         }
@@ -566,13 +564,38 @@ int exception(struct context *ctx)
         if (g_task_own_fpu)
         {
             __asm__ __volatile__("fnsave %0\t\n" ::"m"(g_task_own_fpu->fpu));
-            printk("fpu.cwd=0x%04x\r\n", g_task_own_fpu->fpu.cwd);
-            printk("fpu.swd=0x%04x\r\n", g_task_own_fpu->fpu.swd);
-            printk("fpu.twd=0x%04x\r\n", g_task_own_fpu->fpu.twd);
-            printk("fpu.fip=0x%08x\r\n", g_task_own_fpu->fpu.fip);
-            printk("fpu.fcs=0x%04x\r\n", g_task_own_fpu->fpu.fcs);
-            printk("fpu.foo=0x%08x\r\n", g_task_own_fpu->fpu.foo);
-            printk("fpu.fos=0x%04x\r\n", g_task_own_fpu->fpu.fos);
+        }
+    }
+
+    /**
+     * Return to text mode to show the exception.
+     */
+    {
+        struct vm86_context vm86ctx;
+        int mode;
+
+        memset(&vm86ctx, 0, sizeof(vm86ctx));
+        vm86ctx.esp = 0x1000;
+        vm86ctx.eax = 0x4f03;
+        vm86_call(1, 0x10, &vm86ctx);
+        mode = vm86ctx.ebx & 0x3fff;
+
+        memset(&vm86ctx, 0, sizeof(vm86ctx));
+        vm86ctx.esp = 0x1000;
+        vm86ctx.eax = 0x4f01;
+        vm86ctx.ecx = mode;
+        vm86ctx.es = 0x70;  /*XXX*/
+        vm86ctx.edi = 0x36; /*XXX*/
+        vm86_call(1, 0x10, &vm86ctx);
+        uint16_t ma = *(uint16_t *)0x736; /*XXX*/
+
+        if ((ma >> 4) & 1)
+        {
+            memset(&vm86ctx, 0, sizeof(vm86ctx));
+            vm86ctx.esp = 0x1000;
+            vm86ctx.eax = 0x4f02;
+            vm86ctx.ebx = 0x8003; /*XXX*/
+            vm86_call(1, 0x10, &vm86ctx);
         }
     }
 
@@ -589,6 +612,89 @@ int exception(struct context *ctx)
            ctx->eip, ctx->cs, ctx->eflags);
     if (ctx->cs & SEL_UPL)
         printk("esp=0x%08x,  ss=0x%04x\r\n", ctx->esp, ctx->ss);
+
+    printk("\r\n");
+
+    switch (ctx->exception)
+    {
+    case 0:
+        printk("Divide Error\r\n");
+        break;
+    case 1:
+        printk("Debug\r\n");
+        break;
+    case 2:
+        printk("NMI\r\n");
+        break;
+    case 3:
+        printk("Breakpoint\r\n");
+        break;
+    case 4:
+        printk("Overflow\r\n");
+        break;
+    case 5:
+        printk("Bound Range\r\n");
+        break;
+    case 6:
+        printk("Invalid Opcode\r\n");
+        break;
+    case 7:
+        printk("Device Not Available\r\n");
+        break;
+    case 8:
+        printk("Double Fault\r\n");
+        break;
+    case 9:
+        printk("Coprocessor Segment Overrun\r\n");
+        break;
+    case 10:
+        printk("Invalid TSS\r\n");
+        break;
+    case 11:
+        printk("Segment Not Present\r\n");
+        break;
+    case 12:
+        printk("Stack Fault\r\n");
+        break;
+    case 13:
+        printk("General Protection\r\n");
+        break;
+    case 14:
+    {
+        uint32_t vaddr;
+        __asm__ __volatile__("movl %%cr2,%0" : "=r"(vaddr));
+        printk("Page Fault when %s 0x%08x in %s mode\r\n",
+               (ctx->errorcode & 2) ? "writing" : "reading",
+               vaddr,
+               (ctx->errorcode & 4) ? "user" : "kernel");
+    }
+    break;
+    case 16:
+        printk("x87 FPU Floating-Point Error\r\n");
+        if (g_task_own_fpu)
+        {
+            printk("fpu.cwd=0x%04x\r\n", g_task_own_fpu->fpu.cwd);
+            printk("fpu.swd=0x%04x\r\n", g_task_own_fpu->fpu.swd);
+            printk("fpu.twd=0x%04x\r\n", g_task_own_fpu->fpu.twd);
+            printk("fpu.fip=0x%08x\r\n", g_task_own_fpu->fpu.fip);
+            printk("fpu.fcs=0x%04x\r\n", g_task_own_fpu->fpu.fcs);
+            printk("fpu.foo=0x%08x\r\n", g_task_own_fpu->fpu.foo);
+            printk("fpu.fos=0x%04x\r\n", g_task_own_fpu->fpu.fos);
+        }
+        break;
+    case 17:
+        printk("Alignment Check\r\n");
+        break;
+    case 18:
+        printk("Machine-Check\r\n");
+        break;
+    case 19:
+        printk("SIMD Floating-Point\r\n");
+        break;
+    default:
+        printk("Unknown exception %d\r\n", ctx->exception);
+        break;
+    }
 
     while (1)
         ;
