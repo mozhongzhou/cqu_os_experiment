@@ -43,10 +43,10 @@
 #define SYSCALL_putchar 1000
 #define SYSCALL_getchar 1001
 
-/*实验一、定义系统调用的号码*/
+/*时间函数*/
 #define SYSCALL_time 2013
 
-/*实验三*/
+/*获取优先度 设置优先度函数*/
 #define SYSCALL_getpriority 2017
 #define SYSCALL_setpriority 2018
 

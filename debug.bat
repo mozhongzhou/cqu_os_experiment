@@ -6,7 +6,7 @@ SET QEMUHOME=%~dp0Qemu
 
 SET PATH=%BXSHARE%;%QEMUHOME%;%PATH%
 
-%ComSpec% /k "cd /d %~dp0epos && make clean debug"
+%ComSpec% /k "cd /d %~dp0epos && make debug"
 
 ::START /D Notepad++ notepad++.exe
 

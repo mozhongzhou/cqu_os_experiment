@@ -45,15 +45,10 @@ qemu: hd.img
 qemudbg: MODE=debug
 qemudbg: hd.img
 ifeq ($(OS),Windows_NT)
-	-start $(GDB) \
-	-ex "target remote localhost:1234" \
-	-ex "add-symbol-file kernel/eposkrnl.out 0x100000"\
-    -ex "add-symbol-file kernel/eposkrnl.out 0xc0100000" \
-	-ex "break entry"
-
+	-start $(GDB)
 else
 ifeq ($(shell uname -s),Linux)
-	-/usr/bin/x-terminal-emulator -e $(GDB) 
+	-/usr/bin/x-terminal-emulator -e $(GDB) &
 endif
 ifeq ($(shell uname -s),Darwin)
 	-osascript -e 'on run argv' \
@@ -61,11 +56,7 @@ ifeq ($(shell uname -s),Darwin)
 			   -e 'end run'
 endif
 endif
-	-qemu-system-i386$(W) -S -gdb tcp::1234,nowait,nodelay,server,ipv4 -m 32 -boot order=c -vga std -drive format=raw,file=$^,index=0,media=disk 
-	
-	# 新增命令参数-gdb tcp::1234,nowait,nodelay,server,ipv4 以保证可以让gdb连接到qemu
-    
-	
+	-qemu-system-i386$(W) -S -s -m 32 -boot order=c -vga std -drive format=raw,file=$^,index=0,media=disk
 
 .PHONY: bochs
 bochs: hd.img
