@@ -31,9 +31,6 @@
 #define SYSCALL_sleep 9
 #define SYSCALL_nanosleep 10
 
-#define SYSCALL_getpriority 50
-#define SYSCALL_setpriority 51
-
 #define SYSCALL_beep 181
 #define SYSCALL_vm86 182
 #define SYSCALL_recv 183
