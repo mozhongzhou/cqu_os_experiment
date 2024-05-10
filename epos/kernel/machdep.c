@@ -903,13 +903,35 @@ void syscall(struct context *ctx)
         ctx->eax = sys_setpriority(tid, nice);
     }
     break;
+    case SYSCALL_sem_create:
+    {
+        int value = *(int *)(ctx->esp + 4);
+        ctx->eax = sys_sem_create(value & 0xff);
+    }
+    break;
+    case SYSCALL_sem_destroy:
+    {
+        int semid = *(int *)(ctx->esp + 4);
+        ctx->eax = sys_sem_destroy(semid & 0xff);
+    }
+    break;
+    case SYSCALL_sem_wait:
+    {
+        int semid = *(int *)(ctx->esp + 4);
+        ctx->eax = sys_sem_wait(semid & 0xff);
+    }
+    break;
+    case syscall_sem_signal:
+    {
+        int semid = *(int *)(ctx->esp + 4);
+        ctx->eax = sys_sem_signal(semid & 0xff);
+    }
     default:
         printk("syscall #%d not implemented.\r\n", ctx->eax);
         ctx->eax = -ctx->eax;
         break;
     }
 }
-
 /**
  * page fault处理函数。
  * 特别注意：此时系统的中断处于打开状态

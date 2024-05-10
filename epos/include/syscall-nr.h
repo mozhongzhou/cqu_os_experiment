@@ -47,4 +47,9 @@
 #define SYSCALL_getpriority 2017
 #define SYSCALL_setpriority 2018
 
+#define SYSCALL_sem_create 2020
+#define SYSCALL_sem_destroy 2021
+#define SYSCALL_sem_wait 2022
+#define syscall_sem_signal 2023
+
 #endif /*_SYSCALLNR_H*/

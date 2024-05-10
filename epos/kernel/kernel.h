@@ -207,4 +207,16 @@ unsigned sys_sleep(unsigned seconds);
 int sys_nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 void mi_startup();
+
+// 定义信号量sem数据结构：
+struct sem
+{
+    int value;
+    struct wait_queue *wq_kbd
+};
+
+int sys_sem_create(int value);
+int sys_sem_destroy(int semid);
+int sys_sem_wait(int semid);
+int sys_sem_signal(int semid);
 #endif /*_KERNEL_H*/

@@ -64,4 +64,12 @@ int ioctl(int fd, uint32_t req, void *pv);
 ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 
+int sys_sem_create(int value);
+
+int sys_sem_destroy(int semid);
+
+int sys_sem_wait(int semid);
+
+int sys_sem_signal(int semid);
+
 #endif /*_SYSCALL_H*/
