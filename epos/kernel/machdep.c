@@ -921,7 +921,7 @@ void syscall(struct context *ctx)
         ctx->eax = sys_sem_wait(semid & 0xff);
     }
     break;
-    case syscall_sem_signal:
+    case SYSCALL_sem_signal:
     {
         int semid = *(int *)(ctx->esp + 4);
         ctx->eax = sys_sem_signal(semid & 0xff);
