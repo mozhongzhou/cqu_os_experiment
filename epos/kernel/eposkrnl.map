@@ -553,22 +553,22 @@ OUTPUT(eposkrnl.out pei-i386)
  .debug_line    0x000009b8      0x71b machdep.o
  .debug_line    0x000010d3      0x1e0 task.o
  .debug_line    0x000012b3       0x7f mktime.o
- .debug_line    0x00001332       0xd2 sem.o
- .debug_line    0x00001404      0x1a8 page.o
- .debug_line    0x000015ac      0x134 startup.o
- .debug_line    0x000016e0       0xeb frame.o
- .debug_line    0x000017cb       0x9b kmalloc.o
- .debug_line    0x00001866      0x6a4 dosfs.o
- .debug_line    0x00001f0a      0x109 pe.o
- .debug_line    0x00002013        0x0 elf.o
- .debug_line    0x00002013       0x88 printk.o
- .debug_line    0x0000209b      0x1fb bitmap.o
- .debug_line    0x00002296       0xaa ../lib/softfloat.o
- .debug_line    0x00002340      0x14e ../lib/string.o
- .debug_line    0x0000248e      0x167 ../lib/memcpy.o
- .debug_line    0x000025f5       0xbf ../lib/memset.o
- .debug_line    0x000026b4      0x654 ../lib/snprintf.o
- .debug_line    0x00002d08      0x454 ../lib/tlsf/tlsf.o
+ .debug_line    0x00001332       0xd6 sem.o
+ .debug_line    0x00001408      0x1a8 page.o
+ .debug_line    0x000015b0      0x134 startup.o
+ .debug_line    0x000016e4       0xeb frame.o
+ .debug_line    0x000017cf       0x9b kmalloc.o
+ .debug_line    0x0000186a      0x6a4 dosfs.o
+ .debug_line    0x00001f0e      0x109 pe.o
+ .debug_line    0x00002017        0x0 elf.o
+ .debug_line    0x00002017       0x88 printk.o
+ .debug_line    0x0000209f      0x1fb bitmap.o
+ .debug_line    0x0000229a       0xaa ../lib/softfloat.o
+ .debug_line    0x00002344      0x14e ../lib/string.o
+ .debug_line    0x00002492      0x167 ../lib/memcpy.o
+ .debug_line    0x000025f9       0xbf ../lib/memset.o
+ .debug_line    0x000026b8      0x654 ../lib/snprintf.o
+ .debug_line    0x00002d0c      0x454 ../lib/tlsf/tlsf.o
 
 .debug_ranges   0x00000000     0x1200
  .debug_ranges  0x00000000      0x180 pci.o
