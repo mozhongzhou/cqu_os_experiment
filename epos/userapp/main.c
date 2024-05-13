@@ -33,13 +33,13 @@ void sort_bubble(int ary[], int curConsumer);
 void tsk_control(void *pv);
 void tsk_producer(void *pv);
 void tsk_consumer(void *pv);
-static int mutex = 1;  // 互斥信号量 （初始值为1 表示一次只能有1个线程访问缓冲区
-static int full = 0;   // 消费者在从缓冲区中取出数据之前，必须获取 full 信号量，以确保缓冲区中有数据可用
-static int empty = 10; // 生产者在向缓冲区中插入数据之前，必须获取 empty 信号量，以确保缓冲区中有空闲位置可用
-int curProducer = 0;   // 当前生产者到哪了
-int curConsumer = 0;   // 当前消费者到哪了
-int ary[N];
-
+static int mutex = 1; // 互斥信号量 （初始值为1 表示一次只能有1个线程访问缓冲区
+static int full = 0;  // 消费者在从缓冲区中取出数据之前，必须获取 full 信号量，以确保缓冲区中有数据可用
+static int empty = 1; // 生产者在向缓冲区中插入数据之前，必须获取 empty 信号量，以确保缓冲区中有空闲位置可用
+int curProducer = 0;  // 当前生产者到第几个操作块 注意乘以width
+int curConsumer = 0;  // 当前消费者到第几个操作块 注意乘以width
+int Ary[N];
+int tempAry[N];
 int tid_producer, tid_consumer, tid_control;
 /**
  * GCC insists on __main
@@ -61,12 +61,14 @@ void main(void *pv)
 
     int mode = 0x143;
     init_graphic(mode);
+    // 初始化测试序列
     srand(time(NULL));
     int i;
     int width = g_graphic_dev.XResolution / 10;
     for (i = 0; i < N; i++)
     {
-        ary[i] = rand() % width; // 控制横着的宽度 不会超过边界
+        Ary[i] = rand() % width; // 控制横着的宽度 不会超过边界
+        tempAry[i] = Ary[i];
     }
 
     // 开辟空间
@@ -75,13 +77,12 @@ void main(void *pv)
     unsigned char *stack_consumer = (unsigned char *)malloc(stack_size);
     unsigned char *stack_control = (unsigned char *)malloc(stack_size);
 
-    // 创建线程
-    int tid_producer, tid_consumer, tid_control;
-
     tid_producer = task_create(stack_producer + stack_size, &tsk_producer, (void *)0);
     setpriority(tid_producer, 15);
+
     tid_consumer = task_create(stack_consumer + stack_size, &tsk_consumer, (void *)0);
     setpriority(tid_consumer, 15);
+
     tid_control = task_create(stack_control + stack_size, &tsk_control, (void *)0);
     setpriority(tid_control, 0);
 
@@ -89,9 +90,13 @@ void main(void *pv)
     task_wait(tid_consumer, NULL);
     task_wait(tid_control, NULL);
 
-    sem_destroy(tid_producer);
-    sem_destroy(tid_consumer);
-    sem_destroy(tid_control);
+    free(tid_producer);
+    free(tid_consumer);
+    free(tid_control);
+
+    //  sem_destroy(tid_producer);
+    //  sem_destroy(tid_consumer);
+    //  sem_destroy(tid_control);
     while (1)
         ;
     task_exit(0);
@@ -112,12 +117,8 @@ void sort_bubble(int ary[], int curConsumer)
                 temp = ary[j];
                 ary[j] = ary[j - 1];
                 ary[j - 1] = temp;
-                line(curConsumer, (j - 1) * gap, curConsumer + ary[j - 1], (j - 1) * gap, RGB(128, 0, 128));
-                line(curConsumer, j * gap, curConsumer + ary[j], j * gap, RGB(128, 0, 128));
-                struct timespec sleepTime;
-                sleepTime.tv_sec = 0;          // seconds
-                sleepTime.tv_nsec = 100000000; // nanoseconds
-                nanosleep(&sleepTime, NULL);
+                line(curConsumer, (j - 1) * gap, curConsumer + ary[j - 1], (j - 1) * gap, RGB(255, 165, 0));
+                line(curConsumer, j * gap, curConsumer + ary[j], j * gap, RGB(255, 165, 0));
             }
         }
     }
@@ -128,17 +129,24 @@ void tsk_producer(void *pv)
     int i; // 循环变量
     int width = g_graphic_dev.XResolution / 10;
     int gap = 2;
-    while (pv)
+    while (1)
     {
-        sem_wait(&empty);
-        sem_wait(&mutex);
+        sem_wait(empty);
+        sem_wait(mutex);
         for (i = 0; i < N; i++)
         {
-            line(curProducer, i * gap, curProducer + ary[i], i * gap, RGB(128, 0, 128));
+            // 使用黑色线覆盖原有图像
+            line(curProducer * width, i * gap, (curProducer + 1) * width, i * gap, RGB(0, 0, 0));
+            line(curProducer * width, i * gap, curProducer * width + Ary[i], i * gap, RGB(128, 0, 128));
         }
         curProducer = (curProducer + 1) % 10;
-        sem_signal(&mutex);
-        sem_signal(&full);
+
+        struct timespec sleepTime;
+        sleepTime.tv_sec = 1;  // seconds
+        sleepTime.tv_nsec = 0; // nanoseconds
+        nanosleep(&sleepTime, NULL);
+        sem_signal(mutex);
+        sem_signal(full);
     }
     task_exit(0);
 }
@@ -148,14 +156,24 @@ void tsk_consumer(void *pv)
     int i;
     // 分十份 每份占十分之一
     int width = g_graphic_dev.XResolution / 10;
-    while (pv)
+    while (1)
     {
-        sem_wait(&full);
+        sem_wait(full);
         sem_wait(mutex);
-        sort_bubble(ary, curConsumer); // 对消费者消费的数据进行排序
+
+        sort_bubble(tempAry, curConsumer * width); // 对消费者消费的数据进行排序
+        for (i = 0; i < N; i++)
+        {
+            tempAry[i] = Ary[i];
+        }
         curConsumer = (curConsumer + 1) % 10;
-        sem_signal(&mutex);
-        sem_signal(&empty);
+
+        struct timespec sleepTime;
+        sleepTime.tv_sec = 1;  // seconds
+        sleepTime.tv_nsec = 0; // nanoseconds
+        nanosleep(&sleepTime, NULL);
+        sem_signal(mutex);
+        sem_signal(empty);
     }
 }
 
@@ -178,7 +196,6 @@ void tsk_control(void *pv)
     for (i = 0; i <= nice_consumer; i++)
         line(g_graphic_dev.XResolution / 2 + i * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
              g_graphic_dev.XResolution / 2 + i * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(255, 165, 0));
-
     do
     {
         int key = getchar();
