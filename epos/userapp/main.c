@@ -14,12 +14,11 @@
 extern void *tlsf_create_with_pool(void *mem, size_t bytes);
 extern void *g_heap;
 
-#define NZERO 20
 #define PRI_USER_MIN 0
 #define PRI_USER_MAX 127
-// 间隔值：用于描绘nice实体
-#define emp2 2
+#define GAP 2
 #define N 200
+
 /**
 在生产者-消费者模型中，使用信号量的典型实现如下：
 使用一个信号量 empty 来表示缓冲区中空闲的位置数量。
@@ -29,15 +28,18 @@ extern void *g_heap;
 生产者向缓冲区中插入数据后，会释放 full 信号量，表示有数据可用。
 消费者从缓冲区中取出数据后，会释放 empty 信号量，表示有空闲位置可用。
 */
+
 void sort_bubble(int ary[], int curConsumer);
 void tsk_control(void *pv);
 void tsk_producer(void *pv);
 void tsk_consumer(void *pv);
-static int mutex = 1; // 互斥信号量 （初始值为1 表示一次只能有1个线程访问缓冲区
-static int full = 0;  // 消费者在从缓冲区中取出数据之前，必须获取 full 信号量，以确保缓冲区中有数据可用
-static int empty = 1; // 生产者在向缓冲区中插入数据之前，必须获取 empty 信号量，以确保缓冲区中有空闲位置可用
-int curProducer = 0;  // 当前生产者到第几个操作块 注意乘以width
-int curConsumer = 0;  // 当前消费者到第几个操作块 注意乘以width
+// 信号量声明
+static int mutex; // 互斥信号量 （初始值为1 表示一次只能有1个线程访问缓冲区
+static int full;  // 消费者在从缓冲区中取出数据之前，必须获取 full 信号量，以确保缓冲区中有数据可用
+static int empty; // 生产者在向缓冲区中插入数据之前，必须获取 empty 信号量，以确保缓冲区中有空闲位置可用    缓冲区的大小
+// 当前生产者和消费者的索引
+int curProducer = 0; // 当前生产者到第几个操作块 注意乘以width
+int curConsumer = 0; // 当前消费者到第几个操作块 注意乘以width
 int Ary[N];
 int tempAry[N];
 int tid_producer, tid_consumer, tid_control;
@@ -58,6 +60,9 @@ void __main()
 
 void main(void *pv)
 {
+    mutex = sem_create(1);  // 创建互斥信号量
+    full = sem_create(0);   // 创建 full 信号量
+    empty = sem_create(10); // 创建 empty 信号量
 
     int mode = 0x143;
     init_graphic(mode);
@@ -81,7 +86,7 @@ void main(void *pv)
     setpriority(tid_producer, 15);
 
     tid_consumer = task_create(stack_consumer + stack_size, &tsk_consumer, (void *)0);
-    setpriority(tid_consumer, 15);
+    setpriority(tid_consumer, 60);
 
     tid_control = task_create(stack_control + stack_size, &tsk_control, (void *)0);
     setpriority(tid_control, 0);
@@ -90,13 +95,15 @@ void main(void *pv)
     task_wait(tid_consumer, NULL);
     task_wait(tid_control, NULL);
 
-    free(tid_producer);
-    free(tid_consumer);
-    free(tid_control);
+    // 销毁信号量并释放内存
+    sem_destroy(mutex);
+    sem_destroy(full);
+    sem_destroy(empty);
 
-    //  sem_destroy(tid_producer);
-    //  sem_destroy(tid_consumer);
-    //  sem_destroy(tid_control);
+    free(stack_producer);
+    free(stack_consumer);
+    free(stack_control);
+
     while (1)
         ;
     task_exit(0);
@@ -142,8 +149,8 @@ void tsk_producer(void *pv)
         curProducer = (curProducer + 1) % 10;
 
         struct timespec sleepTime;
-        sleepTime.tv_sec = 1;  // seconds
-        sleepTime.tv_nsec = 0; // nanoseconds
+        sleepTime.tv_sec = 0;          // seconds
+        sleepTime.tv_nsec = 100000000; // nanoseconds
         nanosleep(&sleepTime, NULL);
         sem_signal(mutex);
         sem_signal(full);
@@ -169,8 +176,8 @@ void tsk_consumer(void *pv)
         curConsumer = (curConsumer + 1) % 10;
 
         struct timespec sleepTime;
-        sleepTime.tv_sec = 1;  // seconds
-        sleepTime.tv_nsec = 0; // nanoseconds
+        sleepTime.tv_sec = 0;          // seconds
+        sleepTime.tv_nsec = 100000000; // nanoseconds
         nanosleep(&sleepTime, NULL);
         sem_signal(mutex);
         sem_signal(empty);
@@ -188,14 +195,13 @@ void tsk_control(void *pv)
     int nice_consumer = getpriority(tid_consumer); // 获取线程优先级
     int nice_producer = getpriority(tid_producer);
     // 左边
-
     for (i = 0; i <= nice_producer; i++) // 画出nice的实体
-        line(g_graphic_dev.XResolution / 2 - i * emp2 - 1, g_graphic_dev.YResolution * 3 / 4 - 25,
-             g_graphic_dev.XResolution / 2 - i * emp2 - 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(128, 0, 128));
+        line(g_graphic_dev.XResolution / 2 - i * GAP - 1, g_graphic_dev.YResolution * 3 / 4 - 25,
+             g_graphic_dev.XResolution / 2 - i * GAP - 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(128, 0, 128));
     // 右边
     for (i = 0; i <= nice_consumer; i++)
-        line(g_graphic_dev.XResolution / 2 + i * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
-             g_graphic_dev.XResolution / 2 + i * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(255, 165, 0));
+        line(g_graphic_dev.XResolution / 2 + i * GAP + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
+             g_graphic_dev.XResolution / 2 + i * GAP + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(255, 165, 0));
     do
     {
         int key = getchar();
@@ -205,13 +211,13 @@ void tsk_control(void *pv)
             if (nice_producer > PRI_USER_MAX)
                 nice_producer = PRI_USER_MAX;
             setpriority(tid_producer, PRI_USER_MAX - nice_producer);
-            line(g_graphic_dev.XResolution / 2 - nice_producer * emp2 - 1, g_graphic_dev.YResolution * 3 / 4 - 25,
-                 g_graphic_dev.XResolution / 2 - nice_producer * emp2 - 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(128, 0, 128));
+            line(g_graphic_dev.XResolution / 2 - nice_producer * GAP - 1, g_graphic_dev.YResolution * 3 / 4 - 25,
+                 g_graphic_dev.XResolution / 2 - nice_producer * GAP - 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(128, 0, 128));
         }
         else if (key == 0x5000) // down 降低生产者prouducer的优先度
         {
-            line(g_graphic_dev.XResolution / 2 - nice_producer * emp2 - 1, g_graphic_dev.YResolution * 3 / 4 - 25,
-                 g_graphic_dev.XResolution / 2 - nice_producer * emp2 - 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(0, 0, 0)); // 消失涂黑
+            line(g_graphic_dev.XResolution / 2 - nice_producer * GAP - 1, g_graphic_dev.YResolution * 3 / 4 - 25,
+                 g_graphic_dev.XResolution / 2 - nice_producer * GAP - 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(0, 0, 0)); // 消失涂黑
             nice_producer = nice_producer - 1;
             if (nice_producer < PRI_USER_MIN)
                 nice_producer = PRI_USER_MIN;
@@ -223,13 +229,13 @@ void tsk_control(void *pv)
             if (nice_consumer > PRI_USER_MAX)
                 nice_consumer = PRI_USER_MAX;
             setpriority(tid_consumer, PRI_USER_MAX - nice_consumer);
-            line(g_graphic_dev.XResolution / 2 + nice_consumer * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
-                 g_graphic_dev.XResolution / 2 + nice_consumer * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(255, 165, 0));
+            line(g_graphic_dev.XResolution / 2 + nice_consumer * GAP + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
+                 g_graphic_dev.XResolution / 2 + nice_consumer * GAP + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(255, 165, 0));
         }
         else if (key == 0x4B00) // left 降低消费者consumer的优先度
         {
-            line(g_graphic_dev.XResolution / 2 + nice_consumer * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
-                 g_graphic_dev.XResolution / 2 + nice_consumer * emp2 + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(0, 0, 0));
+            line(g_graphic_dev.XResolution / 2 + nice_consumer * GAP + 1, g_graphic_dev.YResolution * 3 / 4 - 25,
+                 g_graphic_dev.XResolution / 2 + nice_consumer * GAP + 1, g_graphic_dev.YResolution * 3 / 4 + 25, RGB(0, 0, 0));
             nice_consumer = nice_consumer - 1;
             if (nice_consumer < PRI_USER_MIN)
                 nice_consumer = PRI_USER_MIN;

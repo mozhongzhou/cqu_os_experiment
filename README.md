@@ -164,7 +164,7 @@ int gap = 2;
 
 }
 
-void tsk_producer(void _pv)
+void tsk*producer(void \_pv)
 {
 int i; // 循环变量
 int width = g_graphic_dev.XResolution / 10;
@@ -176,7 +176,7 @@ sem_wait(mutex);
 for (i = 0; i < N; i++)
 {
 // 使用黑色线覆盖原有图像
-line(curProducer _ width, i _ gap, (curProducer + 1) _ width, i _ gap, RGB(0, 0, 0));
+line(curProducer * width, i _ gap, (curProducer + 1) _ width, i _ gap, RGB(0, 0, 0));
 line(curProducer _ width, i _ gap, curProducer _ width + Ary[i], i \* gap, RGB(128, 0, 128));
 }
 curProducer = (curProducer + 1) % 10;
@@ -221,9 +221,9 @@ sem_wait(mutex);
 
 }
 
-void tsk_control(void _pv)
+void tsk*control(void \_pv)
 {
-/_
+/*
 事实上这个 getpriority 和 setpriority 是获取、改变的 nice 值，nice 值越小优先级越高。
 然而为了可视化，需要做一个运算，具体运算体现在 setpriority 函数中。
 \*/
