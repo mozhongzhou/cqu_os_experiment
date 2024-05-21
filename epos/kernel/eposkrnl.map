@@ -443,7 +443,7 @@ OUTPUT(eposkrnl.out pei-i386)
  .debug_info    0x0000f21d      0x2f5 ../lib/memcpy.o
  .debug_info    0x0000f512      0x1af ../lib/memset.o
  .debug_info    0x0000f6c1      0xec3 ../lib/snprintf.o
- .debug_info    0x00010584     0x2c9c ../lib/tlsf/tlsf.o
+ .debug_info    0x00010584     0x2ca3 ../lib/tlsf/tlsf.o
 
 .debug_abbrev   0x00000000     0x2e00
  .debug_abbrev  0x00000000      0x1ae ide.o
@@ -568,7 +568,7 @@ OUTPUT(eposkrnl.out pei-i386)
  .debug_line    0x0000248e      0x167 ../lib/memcpy.o
  .debug_line    0x000025f5       0xbf ../lib/memset.o
  .debug_line    0x000026b4      0x654 ../lib/snprintf.o
- .debug_line    0x00002d08      0x454 ../lib/tlsf/tlsf.o
+ .debug_line    0x00002d08      0x440 ../lib/tlsf/tlsf.o
 
 .debug_ranges   0x00000000     0x1200
  .debug_ranges  0x00000000      0x180 pci.o

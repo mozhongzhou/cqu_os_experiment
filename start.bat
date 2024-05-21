@@ -10,7 +10,7 @@ SET QEMUHOME=%~dp0Qemu
 SET PATH=%BXSHARE%;%QEMUHOME%;%PATH%
 ::这一行将 BXSHARE 和 QEMUHOME 两个环境变量的值添加到系统的 PATH 环境变量中，以便系统可以找到 Bochs 和 QEMU 的可执行文件。
 
-%ComSpec% /k "cd /d %~dp0epos && make run"
+%ComSpec% /k "cd /d %~dp0epos && make  run"
 
 
 ::START /D Notepad++ notepad++.exe

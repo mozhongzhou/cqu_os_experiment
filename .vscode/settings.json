@@ -33,7 +33,10 @@
         "stdexcept": "c",
         "system_error": "c",
         "typeinfo": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "pthread.h": "c",
+        "types.h": "c",
+        "stdint.h": "c"
     },
     "git.ignoreLimitWarning": true
 }

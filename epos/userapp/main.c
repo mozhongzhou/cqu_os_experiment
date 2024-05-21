@@ -60,49 +60,50 @@ void __main()
 
 void main(void *pv)
 {
-    mutex = sem_create(1);  // 创建互斥信号量
-    full = sem_create(0);   // 创建 full 信号量
-    empty = sem_create(10); // 创建 empty 信号量
+    test_allocator();
+    // mutex = sem_create(1);  // 创建互斥信号量
+    // full = sem_create(0);   // 创建 full 信号量
+    // empty = sem_create(10); // 创建 empty 信号量
 
-    int mode = 0x143;
-    init_graphic(mode);
-    // 初始化测试序列
-    srand(time(NULL));
-    int i;
-    int width = g_graphic_dev.XResolution / 10;
-    for (i = 0; i < N; i++)
-    {
-        Ary[i] = rand() % width; // 控制横着的宽度 不会超过边界
-        tempAry[i] = Ary[i];
-    }
+    // int mode = 0x143;
+    // init_graphic(mode);
+    // // 初始化测试序列
+    // srand(time(NULL));
+    // int i;
+    // int width = g_graphic_dev.XResolution / 10;
+    // for (i = 0; i < N; i++)
+    // {
+    //     Ary[i] = rand() % width; // 控制横着的宽度 不会超过边界
+    //     tempAry[i] = Ary[i];
+    // }
 
-    // 开辟空间
-    unsigned int stack_size = 1024 * 1024;
-    unsigned char *stack_producer = (unsigned char *)malloc(stack_size);
-    unsigned char *stack_consumer = (unsigned char *)malloc(stack_size);
-    unsigned char *stack_control = (unsigned char *)malloc(stack_size);
+    // // 开辟空间
+    // unsigned int stack_size = 1024 * 1024;
+    // unsigned char *stack_producer = (unsigned char *)malloc(stack_size);
+    // unsigned char *stack_consumer = (unsigned char *)malloc(stack_size);
+    // unsigned char *stack_control = (unsigned char *)malloc(stack_size);
 
-    tid_producer = task_create(stack_producer + stack_size, &tsk_producer, (void *)0);
-    setpriority(tid_producer, 15);
+    // tid_producer = task_create(stack_producer + stack_size, &tsk_producer, (void *)0);
+    // setpriority(tid_producer, 15);
 
-    tid_consumer = task_create(stack_consumer + stack_size, &tsk_consumer, (void *)0);
-    setpriority(tid_consumer, 60);
+    // tid_consumer = task_create(stack_consumer + stack_size, &tsk_consumer, (void *)0);
+    // setpriority(tid_consumer, 60);
 
-    tid_control = task_create(stack_control + stack_size, &tsk_control, (void *)0);
-    setpriority(tid_control, 0);
+    // tid_control = task_create(stack_control + stack_size, &tsk_control, (void *)0);
+    // setpriority(tid_control, 0);
 
-    task_wait(tid_producer, NULL);
-    task_wait(tid_consumer, NULL);
-    task_wait(tid_control, NULL);
+    // task_wait(tid_producer, NULL);
+    // task_wait(tid_consumer, NULL);
+    // task_wait(tid_control, NULL);
 
-    // 销毁信号量并释放内存
-    sem_destroy(mutex);
-    sem_destroy(full);
-    sem_destroy(empty);
+    // // 销毁信号量并释放内存
+    // sem_destroy(mutex);
+    // sem_destroy(full);
+    // sem_destroy(empty);
 
-    free(stack_producer);
-    free(stack_consumer);
-    free(stack_control);
+    // free(stack_producer);
+    // free(stack_consumer);
+    // free(stack_control);
 
     while (1)
         ;
