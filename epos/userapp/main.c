@@ -47,6 +47,7 @@ int tid_producer, tid_consumer, tid_control;
  * GCC insists on __main
  *    http://gcc.gnu.org/onlinedocs/gccint/Collect2.html
  */
+
 void __main()
 {
     size_t heap_size = 32 * 1024 * 1024;
@@ -60,6 +61,7 @@ void __main()
 
 void main(void *pv)
 {
+
     test_allocator();
     // mutex = sem_create(1);  // 创建互斥信号量
     // full = sem_create(0);   // 创建 full 信号量
@@ -105,9 +107,9 @@ void main(void *pv)
     // free(stack_consumer);
     // free(stack_control);
 
-    while (1)
-        ;
-    task_exit(0);
+    // while (1)
+    //     ;
+    // task_exit(0);
 }
 
 void sort_bubble(int ary[], int curConsumer)
@@ -152,7 +154,7 @@ void tsk_producer(void *pv)
         struct timespec sleepTime;
         sleepTime.tv_sec = 0;          // seconds
         sleepTime.tv_nsec = 100000000; // nanoseconds
-        nanosleep(&sleepTime, NULL);
+        // nanosleep(&sleepTime, NULL);
         sem_signal(mutex);
         sem_signal(full);
     }
@@ -179,7 +181,7 @@ void tsk_consumer(void *pv)
         struct timespec sleepTime;
         sleepTime.tv_sec = 0;          // seconds
         sleepTime.tv_nsec = 100000000; // nanoseconds
-        nanosleep(&sleepTime, NULL);
+                                       // nanosleep(&sleepTime, NULL);
         sem_signal(mutex);
         sem_signal(empty);
     }
