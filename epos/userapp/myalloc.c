@@ -11,6 +11,8 @@
 
 #define FREE 0
 #define USED 1
+static int semid;
+
 struct chunk
 {
   char signature[4];  /* "OSEX" */
@@ -29,7 +31,7 @@ void *tlsf_create_with_pool(uint8_t *heap_base, size_t heap_size)
   strncpy(chunk_head->signature, "OSEX", 4);
   chunk_head->next = NULL;
   chunk_head->state = FREE;
-  chunk_head->size = heap_size - sizeof(struct chunk); // Correct initial size
+  chunk_head->size = heap_size;
 
   return NULL;
 }
@@ -41,9 +43,12 @@ void *tlsf_create_with_pool(uint8_t *heap_base, size_t heap_size)
 
 void *malloc(size_t size)
 {
+  // 临界区开始
 
   if (size == 0)
   {
+    // 临界区结束
+
     return NULL;
   }
 
@@ -66,12 +71,14 @@ void *malloc(size_t size)
       }
 
       current->state = USED;
+      // 临界区结束
 
       return (void *)((uint8_t *)current + sizeof(struct chunk));
     }
 
     current = current->next;
   }
+  // 临界区结束
 
   return NULL;
 }
@@ -91,8 +98,12 @@ void *malloc(size_t size)
 
 void free(void *ptr)
 {
+  // 临界区开始
+
   if (ptr == NULL)
   {
+    // 临界区结束
+
     return;
   }
 
@@ -121,6 +132,7 @@ void free(void *ptr)
       current->next = achunk->next;
     }
   }
+  // 临界区结束
 }
 
 // to do
@@ -130,12 +142,16 @@ void free(void *ptr)
 
 void *calloc(size_t num, size_t size)
 {
+  // 临界区开始
+
   size_t total_size = num * size;
   void *ptr = malloc(total_size);
   if (ptr)
   {
     memset(ptr, 0, total_size);
   }
+  // 临界区结束
+
   return ptr;
 }
 
@@ -155,13 +171,20 @@ void *calloc(size_t num, size_t size)
 
 void *realloc(void *oldptr, size_t size)
 {
+  // 临界区开始
+
   if (oldptr == NULL)
   {
+    // 临界区结束
+
     return malloc(size);
   }
   if (size == 0)
   {
     free(oldptr);
+
+    // 临界区结束
+
     return NULL;
   }
 
@@ -169,6 +192,8 @@ void *realloc(void *oldptr, size_t size)
 
   if (strncmp(achunk->signature, "OSEX", 4) != 0)
   {
+    // 临界区结束
+
     return NULL;
   }
 
@@ -185,6 +210,8 @@ void *realloc(void *oldptr, size_t size)
       achunk->next = new_chunk;
       achunk->size = size;
     }
+    // 临界区结束
+
     return oldptr;
   }
 
@@ -194,6 +221,7 @@ void *realloc(void *oldptr, size_t size)
     memcpy(newptr, oldptr, achunk->size);
     free(oldptr);
   }
+  // 临界区结束
 
   return newptr;
 }
@@ -323,7 +351,7 @@ void test_allocator()
   if (chunk_head->next != NULL || chunk_head->size != 32 * 1024 * 1024)
   {
     printf("FAILED\r\n");
-    // return;
+    return;
   }
   printf("PASSED\r\n");
 

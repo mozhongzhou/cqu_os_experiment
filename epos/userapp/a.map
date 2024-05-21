@@ -172,37 +172,37 @@ LOAD myalloc.o
  .text          0x004042a4     0x1680 ../lib/snprintf.o
                 0x00405208                vsnprintf
                 0x004058f8                snprintf
- .text          0x00405924      0x9e4 myalloc.o
+ .text          0x00405924      0xa7c myalloc.o
                 0x00405924                tlsf_create_with_pool
-                0x0040596c                malloc
-                0x00405a04                free
-                0x00405b0c                calloc
-                0x00405b44                realloc
-                0x00405c40                test_allocator
+                0x00405968                malloc
+                0x00405a18                free
+                0x00405b38                calloc
+                0x00405b88                realloc
+                0x00405cc0                test_allocator
  *(SORT(.text$*))
  *(.text.*)
- .text.startup  0x00406308       0x14 main.o
-                0x00406308                main
+ .text.startup  0x004063a0       0x14 main.o
+                0x004063a0                main
  *(.gnu.linkonce.t.*)
  *(.glue_7t)
  *(.glue_7)
-                0x0040631c                ___CTOR_LIST__ = .
-                0x0040631c                __CTOR_LIST__ = .
-                0x0040631c        0x4 LONG 0xffffffff
+                0x004063b4                ___CTOR_LIST__ = .
+                0x004063b4                __CTOR_LIST__ = .
+                0x004063b4        0x4 LONG 0xffffffff
  *(.ctors)
  *(.ctor)
  *(SORT(.ctors.*))
-                0x00406320        0x4 LONG 0x0
-                0x00406324                ___DTOR_LIST__ = .
-                0x00406324                __DTOR_LIST__ = .
-                0x00406324        0x4 LONG 0xffffffff
+                0x004063b8        0x4 LONG 0x0
+                0x004063bc                ___DTOR_LIST__ = .
+                0x004063bc                __DTOR_LIST__ = .
+                0x004063bc        0x4 LONG 0xffffffff
  *(.dtors)
  *(.dtor)
  *(SORT(.dtors.*))
-                0x00406328        0x4 LONG 0x0
+                0x004063c0        0x4 LONG 0x0
  *(.fini)
  *(.gcc_exc)
-                0x0040632c                PROVIDE (etext, .)
+                0x004063c4                PROVIDE (etext, .)
  *(.gcc_except_table)
 
 .data           0x00407000      0x200
@@ -266,7 +266,7 @@ LOAD myalloc.o
  .eh_frame      0x00409ba0       0x70 ../lib/memcpy.o
  .eh_frame      0x00409c10       0x64 ../lib/memset.o
  .eh_frame      0x00409c74      0x130 ../lib/snprintf.o
- .eh_frame      0x00409da4      0x1cc myalloc.o
+ .eh_frame      0x00409da4      0x19c myalloc.o
 
 .pdata
  *(.pdata)
@@ -425,7 +425,7 @@ LOAD myalloc.o
  .debug_info    0x00411da2      0x2f6 ../lib/memcpy.o
  .debug_info    0x00412098      0x1b0 ../lib/memset.o
  .debug_info    0x00412248      0xec4 ../lib/snprintf.o
- .debug_info    0x0041310c     0x10f8 myalloc.o
+ .debug_info    0x0041310c     0x12d1 myalloc.o
 
 .debug_abbrev   0x00415000     0x1600
  *(.debug_abbrev)
@@ -442,7 +442,7 @@ LOAD myalloc.o
  .debug_abbrev  0x00416038       0xab ../lib/memcpy.o
  .debug_abbrev  0x004160e3       0x85 ../lib/memset.o
  .debug_abbrev  0x00416168      0x21d ../lib/snprintf.o
- .debug_abbrev  0x00416385      0x260 myalloc.o
+ .debug_abbrev  0x00416385      0x1f9 myalloc.o
 
 .debug_line     0x00417000     0x1a00
  *(.debug_line)
@@ -459,7 +459,7 @@ LOAD myalloc.o
  .debug_line    0x00417d5a      0x167 ../lib/memcpy.o
  .debug_line    0x00417ec1       0xbf ../lib/memset.o
  .debug_line    0x00417f80      0x654 ../lib/snprintf.o
- .debug_line    0x004185d4      0x26d myalloc.o
+ .debug_line    0x004185d4      0x26e myalloc.o
 
 .debug_frame
  *(.debug_frame*)
@@ -472,7 +472,7 @@ LOAD myalloc.o
  .debug_str     0x00419084        0x9 lib/qsort.o
  .debug_str     0x0041908d       0x17 ../lib/memcpy.o
  .debug_str     0x004190a4       0x53 ../lib/snprintf.o
- .debug_str     0x004190f7        0xa myalloc.o
+ .debug_str     0x004190f7       0x2d myalloc.o
 
 .debug_loc      0x0041a000     0x8e00
  *(.debug_loc)
@@ -488,7 +488,7 @@ LOAD myalloc.o
  .debug_loc     0x0041eda0      0x979 ../lib/memcpy.o
  .debug_loc     0x0041f719      0x23e ../lib/memset.o
  .debug_loc     0x0041f957     0x2b75 ../lib/snprintf.o
- .debug_loc     0x004224cc      0x883 myalloc.o
+ .debug_loc     0x004224cc      0x7ed myalloc.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -519,7 +519,7 @@ LOAD myalloc.o
  .debug_ranges  0x004234a0       0x40 ../lib/string.o
  .debug_ranges  0x004234e0       0x48 ../lib/memcpy.o
  .debug_ranges  0x00423528      0x1b0 ../lib/snprintf.o
- .debug_ranges  0x004236d8       0x18 myalloc.o
+ .debug_ranges  0x004236d8       0x48 myalloc.o
 
 .debug_types
  *(.debug_types .gnu.linkonce.wt.*)
