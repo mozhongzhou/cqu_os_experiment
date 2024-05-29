@@ -107,9 +107,9 @@ void main(void *pv)
     // free(stack_consumer);
     // free(stack_control);
 
-    // while (1)
-    //     ;
-    // task_exit(0);
+    while (1)
+        ;
+    task_exit(0);
 }
 
 void sort_bubble(int ary[], int curConsumer)

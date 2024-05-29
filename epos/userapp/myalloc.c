@@ -23,16 +23,31 @@ struct chunk
 static struct chunk *chunk_head = NULL;
 
 void *g_heap;
+/// start ///////////////////////////////////////
+static volatile int lock = 0;
+// Simple spinlock functions
+void lock_heap()
+{
+  while (__sync_lock_test_and_set(&lock, 1))
+  {
+    // spin until the lock is acquired
+  }
+}
+
+void unlock_heap()
+{
+  __sync_lock_release(&lock);
+}
+
+//////////////////////////finish///////////
 
 void *tlsf_create_with_pool(uint8_t *heap_base, size_t heap_size)
 {
-
   chunk_head = (struct chunk *)heap_base;
   strncpy(chunk_head->signature, "OSEX", 4);
   chunk_head->next = NULL;
   chunk_head->state = FREE;
   chunk_head->size = heap_size;
-
   return NULL;
 }
 
@@ -45,10 +60,9 @@ void *malloc(size_t size)
 {
   if (size == 0)
   {
-
     return NULL;
   }
-
+  lock_heap();
   struct chunk *current = chunk_head;
 
   while (current)
@@ -68,13 +82,13 @@ void *malloc(size_t size)
       }
 
       current->state = USED;
-
+      unlock_heap();
       return (void *)((uint8_t *)current + sizeof(struct chunk));
     }
 
     current = current->next;
   }
-
+  unlock_heap();
   return NULL;
 }
 
@@ -98,7 +112,7 @@ void free(void *ptr)
     // 临界区结束
     return;
   }
-
+  lock_heap();
   struct chunk *achunk = (struct chunk *)((uint8_t *)ptr - sizeof(struct chunk));
 
   if (strncmp(achunk->signature, "OSEX", 4) == 0)
@@ -124,6 +138,7 @@ void free(void *ptr)
       current->next = achunk->next;
     }
   }
+  unlock_heap();
 }
 
 // to do
@@ -172,12 +187,12 @@ void *realloc(void *oldptr, size_t size)
 
     return NULL;
   }
-
+  lock_heap();
   struct chunk *achunk = (struct chunk *)((uint8_t *)oldptr - sizeof(struct chunk));
 
   if (strncmp(achunk->signature, "OSEX", 4) != 0)
   {
-
+    unlock_heap();
     return NULL;
   }
 
@@ -194,10 +209,10 @@ void *realloc(void *oldptr, size_t size)
       achunk->next = new_chunk;
       achunk->size = size;
     }
-
+    unlock_heap();
     return oldptr;
   }
-
+  unlock_heap();
   void *newptr = malloc(size);
   if (newptr)
   {

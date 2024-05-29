@@ -36,7 +36,9 @@
         "cstdint": "c",
         "pthread.h": "c",
         "types.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "stdio.h": "c",
+        "ioctl.h": "c"
     },
     "git.ignoreLimitWarning": true
 }
