@@ -23,9 +23,10 @@ struct chunk
 static struct chunk *chunk_head = NULL;
 
 void *g_heap;
-/// start ///////////////////////////////////////
+
+/////////////start///////////
 static volatile int lock = 0;
-// Simple spinlock functions
+// 试了半天sem信号量不好操作 因为结构体定义在内核态 这里采用自旋锁替代信号量
 void lock_heap()
 {
   while (__sync_lock_test_and_set(&lock, 1))
@@ -39,7 +40,7 @@ void unlock_heap()
   __sync_lock_release(&lock);
 }
 
-//////////////////////////finish///////////
+/////////////finish///////////
 
 void *tlsf_create_with_pool(uint8_t *heap_base, size_t heap_size)
 {
